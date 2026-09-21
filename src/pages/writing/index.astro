@@ -1,0 +1,66 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getPosts, TOPICS, formatDate, isoDate } from '../../lib/posts';
+
+const posts = await getPosts();
+const topics = Object.entries(TOPICS) as [keyof typeof TOPICS, string][];
+---
+<Base
+  title="Writing — vNick.io"
+  description="All posts: infrastructure, live production and build. Data centers, storage, disaster recovery, show networks and the rooms it all lives in."
+>
+  <main>
+    <section class="page wrap">
+      <h1 class="page-title">Writing</h1>
+
+      <div class="filters" role="group" aria-label="Filter by topic" hidden>
+        <button type="button" data-topic="all" aria-pressed="true">All</button>
+        {topics.map(([key, label]) => (
+          <button type="button" data-topic={key} aria-pressed="false">{label}</button>
+        ))}
+      </div>
+
+      <ul class="posts">
+        {posts.map((post) => (
+          <li data-topic={post.data.topic}>
+            <a href={`/writing/${post.id}`}>
+              <span class="k">{TOPICS[post.data.topic]}</span>
+              <span class="t">{post.data.title}{post.data.draft && <span class="draft-badge">Draft</span>}</span>
+              <span class="d"><time datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time></span>
+            </a>
+          </li>
+        ))}
+        {posts.length === 0 && <li class="posts-empty">Writing is on the way — the first posts are being racked and stacked.</li>}
+      </ul>
+      <p class="posts-empty" data-no-match hidden>No posts in this topic yet.</p>
+    </section>
+  </main>
+
+  <script>
+    // Topic filter: progressive enhancement — without JS the full list shows.
+    const group = document.querySelector('.filters') as HTMLElement;
+    const buttons = [...document.querySelectorAll('.filters button')] as HTMLButtonElement[];
+    const items = [...document.querySelectorAll('.posts li[data-topic]')] as HTMLLIElement[];
+    const noMatch = document.querySelector('[data-no-match]') as HTMLElement;
+    group.hidden = false;
+
+    function apply(topic: string): void {
+      buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.topic === topic)));
+      let shown = 0;
+      items.forEach((li) => {
+        const hide = topic !== 'all' && li.dataset.topic !== topic;
+        li.hidden = hide;
+        if (!hide) shown++;
+      });
+      noMatch.hidden = shown > 0 || items.length === 0;
+      const url = new URL(location.href);
+      if (topic === 'all') url.searchParams.delete('topic');
+      else url.searchParams.set('topic', topic);
+      history.replaceState(null, '', url);
+    }
+
+    buttons.forEach((b) => b.addEventListener('click', () => apply(b.dataset.topic!)));
+    const initial = new URLSearchParams(location.search).get('topic');
+    apply(initial && buttons.some((b) => b.dataset.topic === initial) ? initial : 'all');
+  </script>
+</Base>
