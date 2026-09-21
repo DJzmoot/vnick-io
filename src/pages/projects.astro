@@ -1,0 +1,62 @@
+---
+import Base from '../layouts/Base.astro';
+
+const projects = [
+  {
+    area: 'Production',
+    title: 'A production network on an offshore lighthouse',
+    status: 'Ongoing',
+    desc: 'Lighting, video and production networking for the Huntington Lighthouse Music Fest — temporary LAN/WAN with cellular uplinks, designed and built onsite over water, every Labor Day weekend for more than a decade.',
+  },
+  {
+    area: 'Cloud',
+    title: 'Multi-region DR on Oracle Cloud VMware Solution',
+    status: 'Completed',
+    desc: 'Roughly four hundred workloads migrated to OCVS, with geographically distributed disaster recovery across multiple regions and migration/test cycles involving 75+ application and IT personnel.',
+  },
+  {
+    area: 'Virtualization',
+    title: 'VMware standardization across 25+ sites',
+    status: 'Completed',
+    desc: 'One platform and one design language across a North American footprint, with replication and DR architecture behind it.',
+  },
+  {
+    area: 'Facilities',
+    title: 'Server rooms designed before the racks arrive',
+    status: 'Recurring',
+    desc: 'Electrical, HVAC, low voltage, networking, AV and Wi-Fi — coordinated with the trades while the walls are still open.',
+  },
+  {
+    area: 'AV + Lighting',
+    title: 'Permanent venue AV and lighting systems',
+    status: 'Ongoing',
+    desc: 'Design and integration under DJN for restaurants, bars, clubs and catering halls: sound reinforcement, architectural lighting, control systems and networking.',
+  },
+];
+---
+<Base
+  title="Projects — vNick.io"
+  description="Selected builds by Nick Manganiello: offshore production networks, multi-region cloud DR, large VMware migrations, server-room design, and permanent venue AV and lighting installations."
+>
+  <main>
+    <section class="page wrap">
+      <h1 class="page-title">Projects</h1>
+      <p class="lede">
+        Selected builds. The plan is to write these up properly as case
+        studies; until then, this is the index. Where a client or architecture
+        detail might reasonably be confidential, it stays generalized.
+      </p>
+      <ul class="posts">
+        {projects.map((p) => (
+          <li>
+            <div class="row">
+              <span class="k">{p.area}</span>
+              <span class="t">{p.title}<span class="sub">{p.desc}</span></span>
+              <span class="d">{p.status}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </main>
+</Base>

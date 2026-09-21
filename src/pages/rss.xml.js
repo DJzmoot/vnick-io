@@ -6,7 +6,7 @@ export async function GET(context) {
   return rss({
     title: 'vNick.io — Writing',
     description:
-      'Nick is an infrastructure architect. He writes about data centers, storage and disaster recovery, and about the networks and lighting behind live shows.',
+      'Nick Manganiello on network infrastructure, virtualization, BCDR, cloud and MDM, and lighting design — systems, from the rack to the rigging.',
     site: context.site,
     items: posts.map((post) => ({
       title: post.data.title,

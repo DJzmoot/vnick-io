@@ -1,35 +1,204 @@
 ---
 import Base from '../layouts/Base.astro';
+
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Nick Manganiello',
+  alternateName: 'vNick',
+  url: 'https://vnick.io/about/',
+  email: 'nick@vnick.io',
+  jobTitle: 'Infrastructure Architect',
+  description:
+    'Infrastructure architect and systems builder: data centers, networks, virtualization, BCDR, cloud, live production and lighting.',
+  homeLocation: { '@type': 'Place', name: 'Long Island, New York' },
+  sameAs: ['https://stratora.io', 'https://djneventproductions.com/', 'https://github.com/DJzmoot'],
+};
 ---
 <Base
-  title="About — vNick.io"
-  description="Nick — infrastructure architect on Long Island, New York. Data centers by day, show networks and lighting by night."
+  title="About Nick Manganiello — vNick.io"
+  description="How I got here: computers on Windows 95 at five, DJing at eight, DJN Event Productions and independent IT consulting at fourteen, then enterprise infrastructure, theatrical production, facilities work, and Stratora."
 >
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(personLd)} />
+
   <main>
-    <section class="page wrap">
-      <h1 class="page-title">About</h1>
+    <article class="page wrap">
+      <h1 class="page-title">How I got here</h1>
+      <p class="termline">nick@vnick.io:~$ whoami</p>
       <div class="prose">
+        <p>I'm Nick Manganiello. I've spent most of my life building systems.</p>
         <p>
-          <!-- Placeholder copy — replace with the real bio. -->
-          I'm Nick, an infrastructure architect on Long Island, New York. By day
-          I design the unglamorous layers everything else depends on: networks,
-          virtualization, storage, backup and disaster recovery, cloud and
-          identity. By night the same instincts point at stages instead of
-          server rooms — lighting design, show networks and streaming from
-          places that have no infrastructure until you bring it.
+          I started experimenting with computers on Windows 95 around age five,
+          built my first PC from spare parts at seven — it ran Windows 98 SE —
+          and started DJing at eight. By fourteen I was operating DJN Event
+          Productions and doing independent IT consulting for small businesses.
         </p>
         <p>
-          The name is a play on <strong>vNIC</strong> — the virtual network
-          interface every VM gets. This site is where the war stories, designs
-          and post-mortems get written down.
+          From there the work expanded in a few directions at once: enterprise
+          infrastructure, theatrical and event production, AV systems,
+          construction, and facilities. They look like separate disciplines
+          until you're standing in a server room, a theater, a manufacturing
+          plant, or an offshore lighthouse and realize the same things matter
+          every time — power, signal, networking, structure, redundancy, and
+          making the whole system work when people actually need it.
+        </p>
+
+        <h2>Early systems</h2>
+        <p>
+          The computers came first. There was a family machine running Windows
+          95, and by seven I had assembled my own from spare parts and gotten
+          Windows 98 SE running on it. Taking things apart to see why they
+          worked never really stopped; it just moved on to bigger things.
         </p>
         <p>
-          Elsewhere: <a href="https://stratora.io">Stratora</a>, the company I
-          founded — on-premises network and infrastructure monitoring for IT
-          and OT environments — and
-          <a href="https://djneventproductions.com/">DJN Event Productions</a>.
+          The music gear came next. I started DJing at eight, and the early
+          equipment was pieced together from the places a Long Island kid could
+          actually get to — Music Trends in East Meadow, Sam Ash, the Guitar
+          Center in Westbury. Learning signal flow on mixers and amplifiers
+          turned out to be the same discipline as learning it on networks; I
+          just didn't know that yet.
+        </p>
+
+        <h2>DJN and early consulting</h2>
+        <p>
+          At fourteen, two things started in the same year: DJN Event
+          Productions, which I've owned and operated ever since, and
+          independent IT consulting for small businesses.
+        </p>
+        <p>
+          The consulting work was full-stack small-business infrastructure:
+          network design and implementation, Windows Server 2003 through 2012,
+          Active Directory and Small Business Server, storage, backup and
+          disaster recovery, VoIP phone systems, Wi-Fi, structured cabling, and
+          Office 365 migrations. When you're the only IT person a company has,
+          you learn every layer, because there's nobody else to hand a problem
+          to.
+        </p>
+        <p>
+          DJN grew the same way. It started as DJ work and became a production
+          company: live events, but also consulting and design for permanent
+          installations at restaurants, bars, clubs, children's party venues,
+          and catering halls — AV design, sound reinforcement, lighting and
+          architectural lighting, control systems, networking, and integration.
+          Along the way I've consulted for organizations including National
+          Event Connection and The Suffolk Theater in Riverhead.
+        </p>
+
+        <h2>Theater and production</h2>
+        <p>
+          Around sixteen I started building theatrical sets, and that pulled a
+          whole second trade into focus. Through Sanford H. Calhoun High
+          School's theater program I learned set construction, lighting, and
+          audio under Sal Salerno, the program's technical director. The same
+          years brought framing, electrical, finish carpentry, trim and
+          cabinetry, irrigation, low-voltage and holiday lighting design — the
+          physical-world skills that later turned out to matter as much in
+          data centers as they do on stages.
+        </p>
+        <p>
+          The other door into production was the Davidson family. Donald
+          Davidson of HDH Davidson was a longtime family friend and a
+          professional event-production mentor; I worked productions and jobs
+          under him for years. His son Harley is my best friend — he grew up in
+          production, brought me into Calhoun's theater program and into his
+          father's work, and we've built Bellmore-Merrick school district
+          productions and events together. A significant amount of what I know
+          about theatrical set design, production systems, and FOH sound, I
+          learned from Harley.
+        </p>
+
+        <h2>Enterprise infrastructure</h2>
+        <p>
+          The small-business consulting grew into enterprise work — first at
+          CHIPS Technology Group, then at Leviton, where the work grew into
+          principal-level infrastructure architecture: data centers,
+          networking, virtualization, storage, BCDR, cloud, identity, endpoint
+          management, facility technology, M&amp;A integrations, and technical
+          presales and systems design.
+        </p>
+        <p>
+          The scale gives a sense of the work: VMware standardization and
+          expansion across more than twenty-five sites, with North American
+          replication and DR architecture behind it. A migration of roughly
+          four hundred workloads to Oracle Cloud VMware Solution, with
+          geographically distributed disaster recovery across multiple regions, and migration and test cycles that involved more than
+          seventy-five application and IT people. Autopilot and Intune
+          architecture for thousands of endpoints. And underneath all of it,
+          the usual load-bearing layers — enterprise networking, firewalls,
+          storage, backup, wireless, identity.
+        </p>
+
+        <h2>Building facilities, not just racks</h2>
+        <p>
+          A lot of infrastructure work assumes the room already exists. Mine
+          often hasn't. Server rooms, data centers, and facility technology
+          projects put me in the middle of electrical, HVAC, low voltage,
+          networking, AV, and Wi-Fi — coordinating trades while the walls are
+          still open. The theatrical construction background does more work
+          here than any certification: I can read the building, not just the
+          rack elevation.
+        </p>
+
+        <h2>The lighthouse</h2>
+        <p>
+          For more than a decade I've worked with Harley and the HDH Davidson
+          crew on the Huntington Lighthouse Preservation Society's Labor Day
+          weekend Music Fest — a rock concert staged on an operating lighthouse
+          in the middle of Huntington Bay. Harley leads the production; my
+          areas are lighting design, programming and operation, video
+          deployment, and the production networking, and I work cabling,
+          rigging, power distribution, and load-in/load-out alongside the rest
+          of the crew.
+        </p>
+        <p>
+          It's a serious production in an environment that offers you nothing:
+          Meyer Sound line arrays with distributed fills, professional FOH
+          audio, architectural lighting on the lighthouse itself, moving heads,
+          multichannel recording, video production, and livestreams to multiple
+          platforms — all running on temporary LAN and WAN infrastructure with
+          cellular uplinks, designed and built onsite, over water, every year.
+          If you want to know why this site treats networking and lighting as
+          one subject, the lighthouse is the answer.
+        </p>
+
+        <h2>Stratora</h2>
+        <p>
+          I'm the founder of <a href="https://stratora.io">Stratora</a> —
+          self-hosted infrastructure monitoring and operational visibility for
+          real-world IT and OT environments. It grew out of years of operating
+          exactly that kind of mixed infrastructure and wanting better eyes on
+          it. It has its own site, so I'll keep it short here.
+        </p>
+
+        <h2>What I'm doing now</h2>
+        <p>
+          Principal-level infrastructure architecture; running DJN; building
+          Stratora; the lighthouse every Labor Day weekend; and writing things
+          up here as I go. The writing is the part I've neglected the longest —
+          this site is the fix.
+        </p>
+
+        <h2>People who taught me</h2>
+        <p>
+          <strong>Sal Salerno</strong> — technical director of Calhoun's
+          theater program, and my mentor in theatrical construction, lighting,
+          and audio.
+        </p>
+        <p>
+          <strong>Donald Davidson</strong> — of HDH Davidson, a longtime family
+          friend and my mentor in professional event production. I worked
+          productions under him for years, and much of how I approach a show
+          comes from him. He has since passed; the work continues.
+        </p>
+        <p>
+          <strong>Harley Davidson</strong> — Donald's son and my best friend.
+          He learned production from his father from an extremely young age,
+          brought me into both the theater program and the professional work,
+          and taught me much of what I know about set design, production
+          systems, and FOH sound. Since his father's passing, Harley leads much
+          of the event-production work — including the lighthouse.
         </p>
       </div>
-    </section>
+    </article>
   </main>
 </Base>

@@ -53,7 +53,7 @@ main{ position:relative; z-index:1; }
 .hero .intro{ max-width:34ch; font-size:clamp(17px,1.35vw,20px); line-height:1.55; color:#c3c8d0; margin:32px 0 30px; }
 .hero h1{ max-width:none;
   margin:0; font-weight:800; letter-spacing:-.035em;
-  font-size:clamp(56px,10.4vw,160px); line-height:.9;
+  font-size:clamp(48px,9vw,140px); line-height:.9;
 }
 .hero h1 span{ display:block; }
 .hero .row{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
@@ -84,6 +84,9 @@ main{ position:relative; z-index:1; }
 .posts a:hover .t{ color:var(--signal); transform:translateX(10px); }
 .all{ display:inline-block; margin-top:36px; font-weight:600; text-decoration:none; border-bottom:2px solid var(--signal); padding-bottom:4px; }
 .posts-empty{ padding:clamp(20px,3.4vh,34px) 0; color:var(--steel); font-size:clamp(17px,1.3vw,19px); border-bottom:1px solid var(--line); }
+/* Non-link rows (projects index): same grid as .posts a, no hover affordances */
+.posts .row{ display:grid; grid-template-columns:minmax(120px,190px) minmax(0,1fr) auto; gap:clamp(12px,3vw,48px); align-items:baseline; padding:clamp(20px,3.4vh,34px) 0; }
+.posts .sub{ display:block; margin-top:10px; font-weight:400; font-size:clamp(15px,1.15vw,17px); letter-spacing:0; line-height:1.55; color:var(--steel); max-width:60ch; }
 .draft-badge{ font-size:12px; font-weight:600; color:#0e1a04; background:var(--signal); border-radius:999px; padding:3px 10px; vertical-align:middle; margin-left:10px; white-space:nowrap; }
 
 /* Elsewhere */
@@ -95,6 +98,10 @@ main{ position:relative; z-index:1; }
 
 /* Footer */
 footer{ position:relative; z-index:1; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; padding:28px max(24px, calc((100% - 1200px) / 2)); color:var(--steel); font-size:14px; background:var(--graphite); }
+
+/* Terminal-style identity */
+.term{ font-family:var(--font-mono); font-size:13px; color:var(--steel); }
+.termline{ font-family:var(--font-mono); font-size:14px; color:var(--steel); margin:-3vh 0 5vh; }
 
 /* Solid backdrop that fades in over the 3D scene */
 .solid{ background:linear-gradient(180deg, rgba(26,28,32,0) 0, var(--graphite) 16vh); }
@@ -153,7 +160,7 @@ footer{ position:relative; z-index:1; border-top:1px solid var(--line); display:
 /* Responsive */
 @media (max-width: 900px){
   .story .copy{ max-width:100%; background:rgba(26,28,32,.72); padding:24px; border-radius:18px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
-  .posts a{ grid-template-columns:1fr; gap:8px; }
+  .posts a, .posts .row{ grid-template-columns:1fr; gap:8px; }
   nav .ext{ display:none; }
 }
 @media (prefers-reduced-motion: reduce){

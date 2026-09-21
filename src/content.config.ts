@@ -8,7 +8,7 @@ const posts = defineCollection({
     title: z.string(),
     description: z.string(),
     date: z.coerce.date(),
-    topic: z.enum(['infrastructure', 'production', 'build']),
+    topic: z.enum(['network', 'virtualization', 'bcdr', 'cloud', 'lighting']),
     draft: z.boolean().default(false),
   }),
 });

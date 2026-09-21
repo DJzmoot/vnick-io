@@ -4,11 +4,34 @@ import { getPosts, TOPICS, formatDate, isoDate } from '../lib/posts';
 
 const posts = await getPosts();
 const latest = posts.slice(0, 4);
+
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Nick Manganiello',
+  alternateName: 'vNick',
+  url: 'https://vnick.io/',
+  email: 'nick@vnick.io',
+  jobTitle: 'Infrastructure Architect',
+  description:
+    'Infrastructure architect and systems builder: data centers, networks, virtualization, BCDR, cloud, live production and lighting.',
+  homeLocation: { '@type': 'Place', name: 'Long Island, New York' },
+  sameAs: ['https://stratora.io', 'https://djneventproductions.com/', 'https://github.com/DJzmoot'],
+  knowsAbout: [
+    'Network infrastructure',
+    'Virtualization',
+    'Business continuity and disaster recovery',
+    'Cloud infrastructure and endpoint management',
+    'Lighting design and live event production',
+  ],
+};
 ---
 <Base
-  title="vNick.io — Built from the rack up."
-  description="Nick is an infrastructure architect. He writes about data centers, storage and disaster recovery, and about the networks and lighting behind live shows."
+  title="vNick.io — Nick Manganiello — systems, from the rack to the rigging"
+  description="Nick Manganiello is an infrastructure architect and systems builder: data centers, networks, virtualization, BCDR, cloud, live production and lighting. Written up from the field."
 >
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(personLd)} />
+
   <Fragment slot="backdrop">
     <canvas class="scene" id="scene" aria-hidden="true"></canvas>
     <div class="vignette"></div>
@@ -16,38 +39,56 @@ const latest = posts.slice(0, 4);
 
   <main id="top">
     <section class="hero wrap">
-      <h1><span>Built from</span><span>the rack up.</span></h1>
-      <p class="intro">Nick is an infrastructure architect. He writes about data centers, storage and disaster recovery, and about the networks and lighting behind live shows.</p>
+      <h1><span>Systems,</span><span>from the rack</span><span>to the rigging.</span></h1>
+      <p class="intro">I'm Nick Manganiello — infrastructure architect and systems builder. Data centers, networks, virtualization, BCDR, cloud, live production and lighting — and the physical systems under all of it. Written up from the field.</p>
       <div class="row">
         <a class="btn primary" href="#writing">Read the writing</a>
-        <a class="btn ghost" href="#infrastructure">Explore the topics</a>
+        <a class="btn ghost" href="#network">Explore the topics</a>
       </div>
     </section>
 
-    <section class="story wrap" id="infrastructure">
+    <section class="story wrap" id="network">
       <div class="copy">
-        <p class="topic">Infrastructure</p>
+        <p class="topic">Network Infrastructure</p>
+        <h2>Built to carry everything else.</h2>
+        <p>Routing, switching, firewalls, SD-WAN, Wi-Fi and structured cabling — from data-center fabrics to campus closets to temporary networks in places that have none.</p>
+        <a class="more" href="/writing?topic=network">Network posts</a>
+      </div>
+    </section>
+
+    <section class="story wrap" id="virtualization">
+      <div class="copy">
+        <p class="topic">Virtualization Infrastructure</p>
+        <h2>A hundred servers in one rack.</h2>
+        <p>VMware, Hyper-V and Proxmox: cluster design, storage architecture, replication, and the migrations that move hundreds of workloads without anyone noticing.</p>
+        <a class="more" href="/writing?topic=virtualization">Virtualization posts</a>
+      </div>
+    </section>
+
+    <section class="story wrap" id="bcdr">
+      <div class="copy">
+        <p class="topic">BCDR Planning &amp; Infrastructure</p>
         <h2>Storage that survives the bad day.</h2>
-        <p>Networking, virtualization, storage, backup and disaster recovery, cloud and identity. Designs and migrations, and what broke along the way.</p>
-        <a class="more" href="/writing?topic=infrastructure">Infrastructure posts</a>
+        <p>Immutable backups, replication, multi-site and cloud DR, ransomware recovery — designed for actual failure scenarios, not checkbox compliance.</p>
+        <a class="more" href="/writing?topic=bcdr">BCDR posts</a>
       </div>
     </section>
 
-    <section class="story wrap" id="production">
+    <section class="story wrap" id="cloud">
       <div class="copy">
-        <p class="topic">Live production</p>
+        <p class="topic">Cloud Infrastructure &amp; MDM</p>
+        <h2>The data center you don't rack.</h2>
+        <p>OCI and OCVS, hybrid cloud, identity with Entra ID, and endpoint architecture with Intune and Autopilot across thousands of devices.</p>
+        <a class="more" href="/writing?topic=cloud">Cloud + MDM posts</a>
+      </div>
+    </section>
+
+    <section class="story wrap" id="lighting">
+      <div class="copy">
+        <p class="topic">Lighting Design &amp; Programming</p>
         <h2>Networks where there is no network.</h2>
-        <p>Lighting design, show networks, Art-Net and pixel mapping, and streaming from places that have no infrastructure until you bring it.</p>
-        <a class="more" href="/writing?topic=production">Production posts</a>
-      </div>
-    </section>
-
-    <section class="story wrap" id="build">
-      <div class="copy">
-        <p class="topic">Build</p>
-        <h2>Everything before the first rack.</h2>
-        <p>Server rooms, power, HVAC and structured cabling. The physical layer that decides whether everything above it works.</p>
-        <a class="more" href="/writing?topic=build">Build posts</a>
+        <p>Concert, theatrical and architectural lighting; DMX, Art-Net and pixel systems; FOH sound — and the production networks built onsite for shows in places with no infrastructure at all.</p>
+        <a class="more" href="/writing?topic=lighting">Lighting + Production posts</a>
       </div>
     </section>
 
@@ -70,8 +111,8 @@ const latest = posts.slice(0, 4);
       </section>
 
       <section class="elsewhere wrap" id="elsewhere">
-        <a href="https://stratora.io"><span class="name">Stratora</span><span class="what">The company I founded. On-premises network and infrastructure monitoring for IT and OT environments.</span></a>
-        <a href="https://djneventproductions.com/"><span class="name">DJN Event Productions</span><span class="what">DJ, lighting and event production for live shows.</span></a>
+        <a href="https://stratora.io"><span class="name">Stratora</span><span class="what">Founder. Self-hosted infrastructure monitoring and operational visibility for real-world IT and OT environments.</span></a>
+        <a href="https://djneventproductions.com/"><span class="name">DJN Event Productions</span><span class="what">Live production, installed AV, lighting and event systems. Owned and operated since I was fourteen.</span></a>
       </section>
     </div>
   </main>

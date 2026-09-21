@@ -19,6 +19,7 @@ const current = (prefix: string) =>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>{title}</title>
 <meta name="description" content={description} />
+<meta name="author" content="Nick Manganiello" />
 <link rel="canonical" href={canonical} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
@@ -28,6 +29,7 @@ const current = (prefix: string) =>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="alternate" type="application/rss+xml" title="vNick.io — Writing" href="/rss.xml" />
 <link rel="sitemap" href="/sitemap-index.xml" />
+<slot name="head" />
 </head>
 <body>
 <slot name="backdrop" />
@@ -36,7 +38,7 @@ const current = (prefix: string) =>
   <a class="mark" href="/">vNick.io</a>
   <nav aria-label="Main">
     <a href="/writing" aria-current={current('/writing')}>Writing</a>
-    <a href="/#infrastructure">Topics</a>
+    <a href="/projects" aria-current={current('/projects')}>Projects</a>
     <a href="/about" aria-current={current('/about')}>About</a>
     <a class="ext" href="https://stratora.io">Stratora ↗&#xFE0E;</a>
     <a class="ext" href="https://djneventproductions.com/">DJN ↗&#xFE0E;</a>
@@ -46,7 +48,8 @@ const current = (prefix: string) =>
 <slot />
 
 <footer>
-  <span>© {new Date().getFullYear()} vNick.io, Long Island, New York</span>
+  <span>© {new Date().getFullYear()} Nick Manganiello · vNick.io, Long Island, New York</span>
+  <span class="term">nick@vnick.io</span>
   <span>Built with Astro, hosted on GitHub Pages</span>
 </footer>
 </body>

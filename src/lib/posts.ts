@@ -3,11 +3,13 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 export type Post = CollectionEntry<'posts'>;
 export type Topic = Post['data']['topic'];
 
-/** Display names for the three topics, in site order. */
+/** Display names for the topics, in site order. */
 export const TOPICS: Record<Topic, string> = {
-  infrastructure: 'Infrastructure',
-  production: 'Live production',
-  build: 'Build',
+  network: 'Network',
+  virtualization: 'Virtualization',
+  bcdr: 'BCDR',
+  cloud: 'Cloud + MDM',
+  lighting: 'Lighting + Production',
 };
 
 /**

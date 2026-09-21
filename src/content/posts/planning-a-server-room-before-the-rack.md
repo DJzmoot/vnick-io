@@ -2,7 +2,7 @@
 title: "Planning a server room before the rack"
 description: "Sample post — replace with real writing. Power, cooling and cabling decisions that happen before any hardware arrives."
 date: 2026-08-12
-topic: build
+topic: network
 draft: true
 ---
 

@@ -2,7 +2,7 @@
 title: "Designing DR across two cloud regions"
 description: "Sample post — replace with real writing. What a two-region disaster recovery design actually has to survive."
 date: 2026-09-14
-topic: infrastructure
+topic: bcdr
 draft: true
 ---
 

@@ -7,7 +7,8 @@
  *    rather than copied (the rim PointLight most of all: candela + inverse-
  *    square decay now, linear falloff then).
  *  - Rendering pauses while the tab is hidden.
- * Scroll choreography, geometry, materials and LED behavior are unchanged.
+ * Geometry, materials and LED behavior are unchanged from the prototype; the
+ * scroll choreography is extended to five stages, one per writing topic.
  */
 import * as THREE from 'three';
 
@@ -212,19 +213,23 @@ export function initRack(): void {
     return g;
   }
 
+  // Each unit belongs to one of the five writing topics; it slides out during
+  // that topic's scroll stage (see the section ids in stopsEls below).
   const plan: [THREE.Group, number, string | null][] = [
-    [makeSwitch(), 1, 'show'], [makeBlank(), 1, null], [makeController(), 2, 'infra'],
-    [makeShelf(0), 2, 'shelf'], [makeShelf(1), 2, 'shelf'], [makeShelf(2), 2, 'shelf'],
-    [makeServer(), 1, 'infra'], [makeServer(), 1, 'infra'], [makeBlank(), 1, null], [makeUPS(), 2, 'build'],
+    [makeSwitch(), 1, 'network'], [makeBlank(), 1, null], [makeController(), 2, 'cloud'],
+    [makeShelf(0), 2, 'bcdr'], [makeShelf(1), 2, 'bcdr'], [makeShelf(2), 2, 'bcdr'],
+    [makeServer(), 1, 'virt'], [makeServer(), 1, 'virt'], [makeBlank(), 1, null], [makeUPS(), 2, 'lighting'],
   ];
   let yTop = H / 2 - 0.5 * U;
-  let shelfIdx = 0;
+  let shelfIdx = 0, srvIdx = 0;
   plan.forEach(([g, hu, topic]) => {
     g.position.y = yTop - hu * U / 2; yTop -= hu * U;
     rack.add(g); units.push(g);
-    if (topic === 'shelf') { g.userData.window = [0.5 + shelfIdx * 0.12, 1.75]; shelfIdx++; }
-    if (topic === 'show') g.userData.window = [1.5, 2.75];
-    if (topic === 'build') g.userData.window = [2.5, 3.7];
+    if (topic === 'network') g.userData.window = [0.5, 1.75];
+    if (topic === 'virt') { g.userData.window = [1.5 + srvIdx * 0.12, 2.75]; srvIdx++; }
+    if (topic === 'bcdr') { g.userData.window = [2.5 + shelfIdx * 0.12, 3.75]; shelfIdx++; }
+    if (topic === 'cloud') g.userData.window = [3.5, 4.75];
+    if (topic === 'lighting') g.userData.window = [4.5, 5.7];
   });
 
   rack.traverse((o) => {
@@ -245,7 +250,7 @@ export function initRack(): void {
   floor.rotation.x = -Math.PI / 2; floor.position.y = -H / 2 - 0.16; rack.add(floor);
 
   // ---------- Scroll state ----------
-  const stopsEls = ['top', 'infrastructure', 'production', 'build', 'writing'].map((id) => document.getElementById(id));
+  const stopsEls = ['top', 'network', 'virtualization', 'bcdr', 'cloud', 'lighting', 'writing'].map((id) => document.getElementById(id));
   if (stopsEls.some((el) => !el)) { root.classList.add('no3d'); return; }
   let stops: number[] = [];
   function measure(): void { stops = stopsEls.map((el) => el!.getBoundingClientRect().top + window.scrollY); stops[0] = 0; }
@@ -282,15 +287,18 @@ export function initRack(): void {
     s = reduce ? target : s + (target - s) * 0.09;
     const wide = window.innerWidth > 900;
 
-    // orientation per stage
+    // orientation per stage: small turns through the four IT stages, then the
+    // swing to a side profile for lighting/production before the fade
     const baseYaw = s < 1 ? lerp(-0.5, -0.82, ss(0, 1, s))
                   : s < 2 ? lerp(-0.82, -0.42, ss(1, 2, s))
-                  : lerp(-0.42, -1.28, ss(2, 3, s));
+                  : s < 3 ? lerp(-0.42, -0.72, ss(2, 3, s))
+                  : s < 4 ? lerp(-0.72, -0.35, ss(3, 4, s))
+                  : lerp(-0.35, -1.28, ss(4, 5, s));
     yaw += (baseYaw - yaw) * (reduce ? 1 : 0.07);
     rack.rotation.y = yaw;
     rack.rotation.x = 0.06;
 
-    const zoom = lerp(0, -0.8, ss(2.4, 3.2, s));
+    const zoom = lerp(0, -0.8, ss(4.4, 5.2, s));
     const x = wide ? slotX(camera.position.z - zoom) : 0;
     rack.position.set(x, wide ? 0.1 : 0.9, zoom);
     key.position.set(x - 4, 5, zoom + 7); key.target.position.copy(rack.position);
@@ -306,7 +314,7 @@ export function initRack(): void {
       (u.userData.bodyMat as THREE.MeshStandardMaterial).emissive.copy(pullTint).multiplyScalar(u.userData.pull * PULL_EMISSIVE);
     });
 
-    canvas!.style.opacity = String((1 - ss(3.35, 4, s) * 0.85) * (wide ? 1 : 0.6));
+    canvas!.style.opacity = String((1 - ss(5.35, 6, s) * 0.85) * (wide ? 1 : 0.6));
 
     // drive activity
     for (let i = 0; i < leds.length; i++) {
