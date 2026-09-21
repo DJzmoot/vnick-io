@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>vNick.io</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --graphite:#1a1c20; --graphite-2:#23262b; --line:#33373e;
+  --steel:#9098a6; --text:#eef0f3; --signal:#78be20; --signal-deep:#12234d;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+/* The site is dark by design; the tokens stay dark in every viewer mode. */
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --graphite:#1a1c20; --text:#eef0f3; } }
+:root[data-theme="dark"]{ --graphite:#1a1c20; --text:#eef0f3; }
+html{ scroll-padding-top:env(safe-area-inset-top,0px); background:var(--graphite); }
+*,*::before,*::after{ box-sizing:border-box; }
+body{
+  margin:0; background:var(--graphite); color:var(--text);
+  font-family:'Archivo', 'Helvetica Neue', Arial, sans-serif; font-stretch:100%;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+a{ color:inherit; }
+a:focus-visible, button:focus-visible{ outline:2px solid var(--signal); outline-offset:4px; }
+
+.scene{ position:fixed; inset:0; width:100%; height:100%; z-index:0; display:block; transition:opacity .2s linear; }
+.vignette{ position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:radial-gradient(120% 90% at 70% 45%, transparent 40%, rgba(12,13,16,.85) 100%); }
+
+header.bar{
+  position:fixed; top:0; left:0; right:0; z-index:10;
+  padding:calc(env(safe-area-inset-top,0px) + 22px) max(24px, calc((100% - 1200px) / 2)) 22px;
+  display:flex; justify-content:space-between; align-items:center;
+  background:linear-gradient(180deg, rgba(26,28,32,.92), rgba(26,28,32,0));
+}
+.mark{ font-weight:800; font-stretch:125%; font-size:22px; text-decoration:none; letter-spacing:-.02em; }
+nav{ display:flex; gap:clamp(12px,2.4vw,34px); font-size:15px; }
+nav a{ text-decoration:none; color:#c9cdd4; padding:10px 0; }
+nav a:hover{ color:var(--text); }
+nav .ext{ color:var(--steel); }
+
+main{ position:relative; z-index:1; }
+.wrap{ padding-inline:max(24px, calc((100% - 1200px) / 2)); }
+
+/* Hero */
+.hero{ min-height:100vh; min-height:100svh; display:flex; flex-direction:column; justify-content:center; padding-top:96px; padding-bottom:clamp(28px,5vh,64px); position:relative; }
+.hero .intro{ max-width:34ch; font-size:clamp(17px,1.35vw,20px); line-height:1.55; color:#c3c8d0; margin:32px 0 30px; }
+.hero h1{ max-width:none;
+  margin:0; font-weight:850; font-stretch:125%; letter-spacing:-.045em;
+  font-size:clamp(56px,9.6vw,150px); line-height:.86;
+}
+.hero h1 span{ display:block; }
+.hero .row{ display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+.btn{ display:inline-flex; align-items:center; height:50px; padding:0 24px; border-radius:999px; text-decoration:none; font-weight:600; font-size:15px; }
+.btn.primary{ background:var(--signal); color:#0e1a04; }
+.btn.primary:hover{ background:#8fd13a; }
+.btn.ghost{ border:1px solid var(--line); color:var(--text); background:rgba(26,28,32,.5); }
+.btn.ghost:hover{ border-color:var(--steel); }
+
+
+/* Story */
+.story{ min-height:78vh; min-height:78svh; display:flex; align-items:center; }
+.story .copy{ max-width:min(540px, 50%); }
+.story .topic{ font-size:15px; color:var(--signal); margin:0 0 18px; font-weight:600; }
+.story h2{ margin:0 0 22px; font-weight:800; font-stretch:118%; letter-spacing:-.035em; font-size:clamp(40px,5.6vw,92px); line-height:.92; }
+.story p{ margin:0 0 26px; font-size:clamp(17px,1.3vw,19px); line-height:1.6; color:#c3c8d0; max-width:44ch; }
+.story .more{ font-weight:600; text-decoration:none; border-bottom:2px solid var(--signal); padding-bottom:4px; }
+.story .more:hover{ color:#fff; border-color:#fff; }
+
+/* Writing */
+.writing{ position:relative; padding-top:12vh; padding-bottom:8vh; }
+.writing h2{ font-weight:800; font-stretch:125%; letter-spacing:-.04em; font-size:clamp(44px,7vw,120px); line-height:.9; margin:0 0 6vh; }
+.posts{ list-style:none; margin:0; padding:0; border-top:1px solid var(--line); }
+.posts li{ border-bottom:1px solid var(--line); }
+.posts a{ display:grid; grid-template-columns:minmax(120px,190px) minmax(0,1fr) auto; gap:clamp(12px,3vw,48px); align-items:baseline; padding:clamp(20px,3.4vh,34px) 0; text-decoration:none; }
+.posts .t{ font-weight:700; font-stretch:110%; letter-spacing:-.025em; font-size:clamp(24px,3.4vw,52px); line-height:1.02; transition:color .2s ease, transform .35s cubic-bezier(.2,.7,.2,1); }
+.posts .k{ font-size:14px; color:var(--steel); }
+.posts .d{ font-size:14px; color:var(--steel); white-space:nowrap; }
+.posts a:hover .t{ color:var(--signal); transform:translateX(10px); }
+.all{ display:inline-block; margin-top:36px; font-weight:600; text-decoration:none; border-bottom:2px solid var(--signal); padding-bottom:4px; }
+
+/* Elsewhere */
+.elsewhere{ padding-top:8vh; padding-bottom:10vh; display:grid; gap:6vh; }
+.elsewhere a{ display:block; text-decoration:none; }
+.elsewhere .name{ display:block; font-weight:850; font-stretch:125%; letter-spacing:-.045em; font-size:clamp(48px,8.4vw,132px); line-height:.86; transition:color .2s ease; }
+.elsewhere a:hover .name{ color:var(--signal); }
+.elsewhere .what{ display:block; margin-top:16px; font-size:clamp(16px,1.3vw,19px); color:#c3c8d0; max-width:48ch; line-height:1.55; }
+
+footer{ position:relative; z-index:1; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; padding:28px max(24px, calc((100% - 1200px) / 2)); color:var(--steel); font-size:14px; background:var(--graphite); }
+
+.solid{ background:linear-gradient(180deg, rgba(26,28,32,0) 0, var(--graphite) 16vh); }
+
+@media (max-width: 900px){
+  .story .copy{ max-width:100%; background:rgba(26,28,32,.72); padding:24px; border-radius:18px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+  .posts a{ grid-template-columns:1fr; gap:8px; }
+  nav .ext{ display:none; }
+}
+@media (prefers-reduced-motion: reduce){
+  .posts .t{ transition:none; }
+}
+.no3d .scene{ display:none; }
+</style>
+</head>
+<body>
+<canvas class="scene" id="scene" aria-hidden="true"></canvas>
+<div class="vignette"></div>
+
+<header class="bar">
+  <a class="mark" href="#top">vNick.io</a>
+  <nav aria-label="Main">
+    <a href="#writing">Writing</a>
+    <a href="#infrastructure">Topics</a>
+    <a href="#elsewhere">About</a>
+    <a class="ext" href="https://stratora.io">Stratora ↗</a>
+    <a class="ext" href="https://djneventproductions.com/">DJN ↗</a>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero wrap">
+    <h1><span>Built from</span><span>the rack up.</span></h1>
+    <p class="intro">Nick is an infrastructure architect. He writes about data centers, storage and disaster recovery, and about the networks and lighting behind live shows.</p>
+    <div class="row">
+      <a class="btn primary" href="#writing">Read the writing</a>
+      <a class="btn ghost" href="#infrastructure">Explore the topics</a>
+    </div>
+  </section>
+
+  <section class="story wrap" id="infrastructure">
+    <div class="copy">
+      <p class="topic">Infrastructure</p>
+      <h2>Storage that survives the bad day.</h2>
+      <p>Networking, virtualization, storage, backup and disaster recovery, cloud and identity. Designs and migrations, and what broke along the way.</p>
+      <a class="more" href="#writing">Infrastructure posts</a>
+    </div>
+  </section>
+
+  <section class="story wrap" id="production">
+    <div class="copy">
+      <p class="topic">Live production</p>
+      <h2>Networks where there is no network.</h2>
+      <p>Lighting design, show networks, Art-Net and pixel mapping, and streaming from places that have no infrastructure until you bring it.</p>
+      <a class="more" href="#writing">Production posts</a>
+    </div>
+  </section>
+
+  <section class="story wrap" id="build">
+    <div class="copy">
+      <p class="topic">Build</p>
+      <h2>Everything before the first rack.</h2>
+      <p>Server rooms, power, HVAC and structured cabling. The physical layer that decides whether everything above it works.</p>
+      <a class="more" href="#writing">Build posts</a>
+    </div>
+  </section>
+
+  <div class="solid">
+    <section class="writing wrap" id="writing">
+      <h2>Latest writing</h2>
+      <ul class="posts">
+        <li><a href="#"><span class="k">Infrastructure</span><span class="t">Designing DR across two cloud regions</span><span class="d">[Date]</span></a></li>
+        <li><a href="#"><span class="k">Live production</span><span class="t">A production network on an offshore lighthouse</span><span class="d">[Date]</span></a></li>
+        <li><a href="#"><span class="k">Build</span><span class="t">Planning a server room before the rack</span><span class="d">[Date]</span></a></li>
+        <li><a href="#"><span class="k">Infrastructure</span><span class="t">Immutable backups that survive a bad day</span><span class="d">[Date]</span></a></li>
+      </ul>
+      <a class="all" href="#">All posts</a>
+    </section>
+
+    <section class="elsewhere wrap" id="elsewhere">
+      <a href="https://stratora.io"><span class="name">Stratora</span><span class="what">The company I founded. On-premises network and infrastructure monitoring for IT and OT environments.</span></a>
+      <a href="https://djneventproductions.com/"><span class="name">DJN Event Productions</span><span class="what">[Your DJN tagline]</span></a>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <span>© 2026 vNick.io, Long Island, New York</span>
+  <span>Built with Astro, hosted on GitHub Pages</span>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const root = document.documentElement;
+  const canvas = document.getElementById('scene');
+  if (!window.THREE) { root.classList.add('no3d'); return; }
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true }); }
+  catch(e){ root.classList.add('no3d'); return; }
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+  camera.position.set(0, 0.9, 10);
+  camera.lookAt(0, 0.1, 0);
+
+  scene.add(new THREE.HemisphereLight(0xb9c6e6, 0x0a0d16, 0.55));
+  const key = new THREE.DirectionalLight(0xffffff, 1.25); key.position.set(-4, 5, 7); scene.add(key); scene.add(key.target);
+  key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -.0004; key.shadow.normalBias = .015;
+  Object.assign(key.shadow.camera, { left: -3.2, right: 3.2, top: 3.2, bottom: -3.2, near: 1, far: 22 });
+  const top = new THREE.DirectionalLight(0xeef0f3, .45); top.position.set(0, 8, 2); scene.add(top); scene.add(top.target);
+  const fill = new THREE.DirectionalLight(0x6f86c4, 0.45); fill.position.set(6, -1, 3); scene.add(fill);
+  const rim = new THREE.PointLight(0x1f4bd1, 3.2, 14); rim.position.set(3, 1.5, -3.5); scene.add(rim);
+
+  // ---------- Rack ----------
+  const U = 0.2, W = 2.0, D = 2.2, HU = 16, H = HU * U;
+  const FZ = D / 2;          // front plane of the rack frame
+  const FACE = FZ - .07;     // front face of every chassis body
+  const rack = new THREE.Group(); scene.add(rack);
+  const mat = (c, m, r) => new THREE.MeshStandardMaterial({ color:c, metalness:m, roughness:r });
+  const frameMat = mat(0x15171b, .55, .5), railMat = mat(0x30343c, .75, .32), holeMat = mat(0x050506, 0, 1);
+  const carrierMat = mat(0x2b2f37, .55, .38), handleMat = mat(0x6b7280, .85, .25), darkMat = mat(0x0a0b0d, .2, .85);
+  const bezelMat = mat(0x33373f, .5, .35), plateMat = mat(0x2a2d34, .6, .4), screwMat = mat(0x8a919d, .9, .22);
+  const sfpMat = mat(0x7b828e, .9, .25);
+
+  // rounded, bevelled box (cached geometry)
+  const geoCache = {};
+  function rgeo(w, h, d, r){
+    const k = [w, h, d, r].map(v => v.toFixed(4)).join('|');
+    if (geoCache[k]) return geoCache[k];
+    const b = Math.min(r, d / 3, h / 4, w / 4);
+    const iw = w - 2 * b, ih = h - 2 * b, c = Math.min(r, iw / 2, ih / 2) * .6;
+    const s = new THREE.Shape(), x = -iw / 2, y = -ih / 2;
+    s.moveTo(x + c, y); s.lineTo(x + iw - c, y); s.quadraticCurveTo(x + iw, y, x + iw, y + c);
+    s.lineTo(x + iw, y + ih - c); s.quadraticCurveTo(x + iw, y + ih, x + iw - c, y + ih);
+    s.lineTo(x + c, y + ih); s.quadraticCurveTo(x, y + ih, x, y + ih - c);
+    s.lineTo(x, y + c); s.quadraticCurveTo(x, y, x + c, y);
+    const g = new THREE.ExtrudeGeometry(s, { depth: Math.max(.001, d - 2 * b), bevelEnabled: true, bevelThickness: b, bevelSize: b, bevelSegments: 2, curveSegments: 3 });
+    g.center(); geoCache[k] = g; return g;
+  }
+  function rb(parent, w, h, d, x, y, z, m, r){ const o = new THREE.Mesh(rgeo(w, h, d, r == null ? .012 : r), m); o.position.set(x, y, z); parent.add(o); return o; }
+  function box(parent, w, h, d, x, y, z, m){ const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.position.set(x, y, z); parent.add(o); return o; }
+  // z for an object of depth d whose back sits `lift` in front of the chassis face
+  const on = (d, lift) => FACE + (lift || 0) + d / 2;
+
+  const leds = [], ledGeo = {};
+  function led(parent, x, y, z, s, color, mode){
+    const g = ledGeo[s] || (ledGeo[s] = new THREE.CircleGeometry(s / 2, 12));
+    const m = new THREE.MeshBasicMaterial({ color });
+    const o = new THREE.Mesh(g, m); o.position.set(x, y, z); parent.add(o);
+    const c = new THREE.Color(color);
+    leds.push({ m, on: c, off: c.clone().multiplyScalar(.1), mode, next: Math.random() * 800, state: true, ph: Math.random() * 6 });
+    return o;
+  }
+  const screwGeo = new THREE.CylinderGeometry(.017, .017, .03, 14); screwGeo.rotateX(Math.PI / 2);
+  function screw(parent, x, y){ const o = new THREE.Mesh(screwGeo, screwMat); o.position.set(x, y, FZ + .065); parent.add(o); }
+
+  // frame: posts, top/bottom, perforated front rails
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx, sz]) => rb(rack, .1, H + .24, .1, sx * (W/2 + .1), 0, sz * (FZ + .02), frameMat, .02));
+  rb(rack, W + .34, .08, D + .18, 0, H/2 + .14, 0, frameMat, .02);
+  rb(rack, W + .34, .08, D + .18, 0, -H/2 - .14, 0, frameMat, .02);
+  [-1, 1].forEach(sx => {
+    rb(rack, .07, H + .12, .04, sx * (W/2 + .045), 0, FZ + .02, railMat, .008);
+    for (let i = 0; i < HU * 3; i++) box(rack, .022, .022, .004, sx * (W/2 + .045), H/2 - (i + .5) * U / 3, FZ + .042, holeMat);
+  });
+
+  const units = [];
+  function chassis(hu, color){
+    const g = new THREE.Group();
+    const h = hu * U - .016;
+    const body = rb(g, W - .04, h, D - .14, 0, 0, FACE - (D - .14) / 2, mat(color, .5, .4), .014);
+    // rack ears with thumbscrews
+    [-1, 1].forEach(sx => {
+      rb(g, .1, h, .03, sx * (W/2 + .01), 0, FZ + .035, plateMat, .008);
+      if (hu === 1) screw(g, sx * (W/2 + .015), 0);
+      else { screw(g, sx * (W/2 + .015), h / 4); screw(g, sx * (W/2 + .015), -h / 4); }
+    });
+    // side flanges bridging face to ears so the front reads as one piece
+    [-1, 1].forEach(sx => rb(g, .05, h, .12, sx * (W/2 - .03), 0, on(.12, -.04), plateMat, .008));
+    g.userData = { h, body, pull: 0, window: null };
+    return g;
+  }
+
+  function makeSwitch(){
+    const g = chassis(1, 0x2c3037), h = g.userData.h;
+    rb(g, W - .16, h - .02, .04, 0, 0, on(.04), bezelMat, .01);
+    const pz = on(.04) + .02;
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 24; c++){
+      const x = -W/2 + .17 + c * .058 + Math.floor(c / 6) * .018, y = r ? -.036 : .034;
+      rb(g, .05, .044, .03, x, y, pz - .006, darkMat, .004);           // recessed port opening
+      box(g, .03, .012, .004, x, y + (r ? -.012 : .012), pz + .004, handleMat); // latch tab
+      if (Math.random() < .85) led(g, x - .016, y + (r ? -.028 : .028), pz + .01, .013, c % 9 === 4 ? 0xffb020 : 0x36d27a, 'busy');
+    }
+    for (let i = 0; i < 4; i++) rb(g, .075, .06, .05, .6 + i * .088, 0, pz + .01, sfpMat, .006);
+    led(g, .95, .05, pz + .01, .018, 0x4d86ff, 'breathe');
+    return g;
+  }
+  function makeBlank(){
+    const g = chassis(1, 0x24272d), h = g.userData.h;
+    rb(g, W - .16, h - .02, .025, 0, 0, on(.025), plateMat, .008);
+    for (let i = 0; i < 30; i++) rb(g, .02, .1, .02, -.8 + i * .055, 0, on(.02, .012), darkMat, .006);
+    return g;
+  }
+  function makeController(){
+    const g = chassis(2, 0x2f333b), h = g.userData.h;
+    // deep front bezel with a crowned face
+    rb(g, W - .16, h - .02, .1, 0, 0, on(.1), bezelMat, .03);
+    rb(g, W - .3, h - .1, .03, 0, .01, on(.03, .09), mat(0x3a3f48, .55, .3), .02);
+    const vz = on(.02, .115);
+    for (let r = 0; r < 3; r++) for (let i = 0; i < 30; i++) rb(g, .028, .028, .02, -.78 + i * .042 + (r % 2) * .021, .07 - r * .045, vz, darkMat, .012);
+    box(g, W - .5, .01, .01, 0, -h / 2 + .045, on(.01, .1), new THREE.MeshBasicMaterial({ color: 0x78be20 }));
+    rb(g, .34, .075, .02, .6, -.08, on(.02, .1), darkMat, .006);
+    led(g, .52, -.08, on(0, .125), .02, 0x4d86ff, 'breathe');
+    led(g, .6, -.08, on(0, .125), .02, 0x36d27a, 'steady');
+    led(g, .68, -.08, on(0, .125), .02, 0x36d27a, 'steady');
+    return g;
+  }
+  function makeShelf(n){
+    const g = chassis(2, 0x262a30), h = g.userData.h;
+    const bw = (W - .2) / 24;
+    for (let i = 0; i < 24; i++){
+      const x = -W/2 + .1 + bw * (i + .5);
+      rb(g, bw - .012, h - .03, .09, x, 0, on(.09), carrierMat, .01);          // drive carrier
+      rb(g, bw - .026, .03, .035, x, h/2 - .05, on(.035, .09), handleMat, .01); // pull handle
+      for (let v = 0; v < 4; v++) box(g, bw - .04, .006, .004, x, .03 - v * .02, on(.004, .09), darkMat); // carrier vents
+      rb(g, .018, .012, .01, x, -h/2 + .085, on(.01, .09), handleMat, .004);   // latch
+      let color = 0x36d27a, mode = 'busy';
+      if (n === 1 && i === 9){ color = 0xffa31a; mode = 'breathe'; }
+      if (n === 2 && i === 21){ color = 0x4d86ff; mode = 'breathe'; }
+      led(g, x, -h/2 + .045, on(0, .092), .026, color, mode);
+    }
+    return g;
+  }
+  function makeServer(){
+    const g = chassis(1, 0x2b2f36), h = g.userData.h;
+    for (let i = 0; i < 8; i++){
+      const x = -.86 + i * .1;
+      rb(g, .09, h - .03, .07, x, 0, on(.07), carrierMat, .008);
+      rb(g, .07, .02, .02, x, .035, on(.02, .07), handleMat, .006);
+      led(g, x + .028, -.045, on(0, .072), .015, 0x36d27a, 'busy');
+    }
+    rb(g, 1.02, h - .02, .06, .44, 0, on(.06), bezelMat, .02);
+    for (let i = 0; i < 20; i++) rb(g, .018, .1, .02, .02 + i * .045, 0, on(.02, .055), darkMat, .006);
+    const btn = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, .03, 18).rotateX(Math.PI / 2), handleMat); btn.position.set(.92, 0, on(.03, .05)); g.add(btn);
+    led(g, .92, 0, on(0, .082), .014, 0x4d86ff, 'steady');
+    return g;
+  }
+  function makeUPS(){
+    const g = chassis(2, 0x202328), h = g.userData.h;
+    rb(g, W - .16, h - .02, .09, 0, 0, on(.09), bezelMat, .035);
+    rb(g, .56, .2, .02, -.36, .03, on(.02, .085), darkMat, .01);
+    box(g, .48, .14, .004, -.36, .03, on(.004, .102), new THREE.MeshBasicMaterial({ color: 0x173a9e }));
+    for (let i = 0; i < 5; i++) led(g, .18 + i * .08, .06, on(0, .092), .026, 0x36d27a, 'steady');
+    for (let i = 0; i < 3; i++){ const b = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .03, 20).rotateX(Math.PI / 2), handleMat); b.position.set(.22 + i * .12, -.07, on(.03, .085)); g.add(b); }
+    for (let i = 0; i < 16; i++) rb(g, .018, .12, .02, -.92 + i * .03 + (i > 7 ? 1.4 : 0), -.05, on(.02, .085), darkMat, .006);
+    return g;
+  }
+
+  const plan = [
+    [makeSwitch(), 1, 'show'], [makeBlank(), 1, null], [makeController(), 2, 'infra'],
+    [makeShelf(0), 2, 'shelf'], [makeShelf(1), 2, 'shelf'], [makeShelf(2), 2, 'shelf'],
+    [makeServer(), 1, 'infra'], [makeServer(), 1, 'infra'], [makeBlank(), 1, null], [makeUPS(), 2, 'build']
+  ];
+  let yTop = H/2 - .5 * U;
+  let shelfIdx = 0;
+  plan.forEach(([g, hu, topic]) => {
+    g.position.y = yTop - hu * U / 2; yTop -= hu * U;
+    rack.add(g); units.push(g);
+    if (topic === 'shelf'){ g.userData.window = [0.5 + shelfIdx * .12, 1.75]; shelfIdx++; }
+    if (topic === 'show') g.userData.window = [1.5, 2.75];
+    if (topic === 'build') g.userData.window = [2.5, 3.7];
+  });
+
+  rack.traverse(o => { if (o.isMesh && o.material && o.material.isMeshStandardMaterial){ o.castShadow = true; o.receiveShadow = true; } });
+  const catcher = new THREE.Mesh(new THREE.PlaneGeometry(9, 9), new THREE.ShadowMaterial({ color: 0x061033, opacity: .6 }));
+  catcher.rotation.x = -Math.PI / 2; catcher.position.y = -H/2 - .175; catcher.receiveShadow = true; rack.add(catcher);
+
+  // floor glow
+  const gc = document.createElement('canvas'); gc.width = gc.height = 256;
+  const gx = gc.getContext('2d'); const grd = gx.createRadialGradient(128,128,0,128,128,128);
+  grd.addColorStop(0, 'rgba(38,78,190,.5)'); grd.addColorStop(.45, 'rgba(20,40,110,.18)'); grd.addColorStop(1, 'rgba(0,0,0,0)');
+  gx.fillStyle = grd; gx.fillRect(0,0,256,256);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(7, 7), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(gc), transparent:true, depthWrite:false }));
+  floor.rotation.x = -Math.PI/2; floor.position.y = -H/2 - .16; rack.add(floor);
+
+  // ---------- Scroll state ----------
+  const stopsEls = ['top', 'infrastructure', 'production', 'build', 'writing'].map(id => document.getElementById(id));
+  let stops = [];
+  function measure(){ stops = stopsEls.map(el => el.getBoundingClientRect().top + window.scrollY); stops[0] = 0; }
+  function progress(){
+    const y = window.scrollY;
+    for (let i = 0; i < stops.length - 1; i++){
+      if (y < stops[i + 1]) return i + (y - stops[i]) / Math.max(1, stops[i + 1] - stops[i]);
+    }
+    return stops.length - 1 + (y - stops[stops.length - 1]) / window.innerHeight;
+  }
+  const ss = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  function resize(){
+    const w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); measure();
+  }
+  window.addEventListener('resize', resize); resize();
+  window.addEventListener('load', measure);
+
+  let s = progress(), yaw = -.5;
+  function slotX(depth){
+    const w = window.innerWidth, content = Math.min(1200, w - 48);
+    const px = (w - content) / 2 + content * .76;
+    const ndc = px / w * 2 - 1;
+    return ndc * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * depth * camera.aspect;
+  }
+  const blue = new THREE.Color(0x5a9a14);
+
+  function frame(t){
+    const target = progress();
+    s = reduce ? target : s + (target - s) * .09;
+    const wide = window.innerWidth > 900;
+
+    // orientation per stage
+    const baseYaw = s < 1 ? lerp(-.5, -.82, ss(0, 1, s))
+                  : s < 2 ? lerp(-.82, -.42, ss(1, 2, s))
+                  : lerp(-.42, -1.28, ss(2, 3, s));
+    const want = baseYaw;
+    yaw += (want - yaw) * (reduce ? 1 : .07);
+    rack.rotation.y = yaw;
+    rack.rotation.x = .06;
+
+    const zoom = lerp(0, -.8, ss(2.4, 3.2, s));
+    const x = wide ? slotX(camera.position.z - zoom) : 0;
+    rack.position.set(x, wide ? .1 : .9, zoom);
+    key.position.set(x - 4, 5, zoom + 7); key.target.position.copy(rack.position);
+    top.position.set(x, 8, zoom + 2); top.target.position.copy(rack.position);
+    const sc = wide ? 1 : .78; rack.scale.set(sc, sc, sc);
+
+    // units slide out on their topic's stage
+    units.forEach(u => {
+      const w = u.userData.window;
+      const pull = w ? ss(w[0], w[0] + .35, s) * (1 - ss(w[1] - .35, w[1], s)) : 0;
+      u.userData.pull += (pull - u.userData.pull) * (reduce ? 1 : .12);
+      u.position.z = u.userData.pull * 1.35;
+      u.userData.body.material.emissive.copy(blue).multiplyScalar(u.userData.pull * .22);
+    });
+
+    canvas.style.opacity = String((1 - ss(3.35, 4, s) * .85) * (wide ? 1 : .6));
+
+    // drive activity
+    for (let i = 0; i < leds.length; i++){
+      const L = leds[i];
+      if (L.mode === 'steady') continue;
+      if (L.mode === 'breathe'){ L.m.color.copy(L.off).lerp(L.on, reduce ? 1 : .55 + .45 * Math.sin(t * .003 + L.ph)); continue; }
+      if (reduce) { if (!L.state){ L.state = true; L.m.color.copy(L.on); } continue; }
+      if (t > L.next){
+        L.state = !L.state || Math.random() < .25;
+        L.next = t + (L.state ? 80 + Math.random() * 1100 : 25 + Math.random() * 110);
+        L.m.color.copy(L.state ? L.on : L.off);
+      }
+    }
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

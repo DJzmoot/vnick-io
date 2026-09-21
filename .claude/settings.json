@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(gh:*)",
+      "Bash(npm install:*)",
+      "Bash(npm i:*)",
+      "Bash(npm add:*)",
+      "Bash(npm create:*)",
+      "Bash(npx:*)",
+      "PowerShell(git push:*)",
+      "PowerShell(gh:*)",
+      "PowerShell(npm install:*)",
+      "PowerShell(npm i:*)",
+      "PowerShell(npm add:*)",
+      "PowerShell(npm create:*)",
+      "PowerShell(npx:*)"
+    ],
+    "deny": [
+      "Bash(git config --global:*)",
+      "Bash(git config --system:*)",
+      "PowerShell(git config --global:*)",
+      "PowerShell(git config --system:*)"
+    ]
+  }
+}
