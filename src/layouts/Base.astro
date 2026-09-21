@@ -28,9 +28,6 @@ const current = (prefix: string) =>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="alternate" type="application/rss+xml" title="vNick.io — Writing" href="/rss.xml" />
 <link rel="sitemap" href="/sitemap-index.xml" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap" rel="stylesheet" />
 </head>
 <body>
 <slot name="backdrop" />
@@ -41,8 +38,8 @@ const current = (prefix: string) =>
     <a href="/writing" aria-current={current('/writing')}>Writing</a>
     <a href="/#infrastructure">Topics</a>
     <a href="/about" aria-current={current('/about')}>About</a>
-    <a class="ext" href="https://stratora.io">Stratora ↗</a>
-    <a class="ext" href="https://djneventproductions.com/">DJN ↗</a>
+    <a class="ext" href="https://stratora.io">Stratora ↗&#xFE0E;</a>
+    <a class="ext" href="https://djneventproductions.com/">DJN ↗&#xFE0E;</a>
   </nav>
 </header>
 
