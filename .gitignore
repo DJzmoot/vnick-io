@@ -26,5 +26,8 @@ Thumbs.db
 # local Claude Code overrides
 .claude/settings.local.json
 
+# local browser-testing artifacts
+.playwright-mcp/
+
 # jetbrains setting folder
 .idea/

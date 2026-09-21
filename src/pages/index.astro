@@ -1,17 +1,83 @@
 ---
+import Base from '../layouts/Base.astro';
+import { getPosts, TOPICS, formatDate, isoDate } from '../lib/posts';
 
+const posts = await getPosts();
+const latest = posts.slice(0, 4);
 ---
+<Base
+  title="vNick.io — Built from the rack up."
+  description="Nick is an infrastructure architect. He writes about data centers, storage and disaster recovery, and about the networks and lighting behind live shows."
+>
+  <Fragment slot="backdrop">
+    <canvas class="scene" id="scene" aria-hidden="true"></canvas>
+    <div class="vignette"></div>
+  </Fragment>
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+  <main id="top">
+    <section class="hero wrap">
+      <h1><span>Built from</span><span>the rack up.</span></h1>
+      <p class="intro">Nick is an infrastructure architect. He writes about data centers, storage and disaster recovery, and about the networks and lighting behind live shows.</p>
+      <div class="row">
+        <a class="btn primary" href="#writing">Read the writing</a>
+        <a class="btn ghost" href="#infrastructure">Explore the topics</a>
+      </div>
+    </section>
+
+    <section class="story wrap" id="infrastructure">
+      <div class="copy">
+        <p class="topic">Infrastructure</p>
+        <h2>Storage that survives the bad day.</h2>
+        <p>Networking, virtualization, storage, backup and disaster recovery, cloud and identity. Designs and migrations, and what broke along the way.</p>
+        <a class="more" href="/writing?topic=infrastructure">Infrastructure posts</a>
+      </div>
+    </section>
+
+    <section class="story wrap" id="production">
+      <div class="copy">
+        <p class="topic">Live production</p>
+        <h2>Networks where there is no network.</h2>
+        <p>Lighting design, show networks, Art-Net and pixel mapping, and streaming from places that have no infrastructure until you bring it.</p>
+        <a class="more" href="/writing?topic=production">Production posts</a>
+      </div>
+    </section>
+
+    <section class="story wrap" id="build">
+      <div class="copy">
+        <p class="topic">Build</p>
+        <h2>Everything before the first rack.</h2>
+        <p>Server rooms, power, HVAC and structured cabling. The physical layer that decides whether everything above it works.</p>
+        <a class="more" href="/writing?topic=build">Build posts</a>
+      </div>
+    </section>
+
+    <div class="solid">
+      <section class="writing wrap" id="writing">
+        <h2>Latest writing</h2>
+        <ul class="posts">
+          {latest.map((post) => (
+            <li>
+              <a href={`/writing/${post.id}`}>
+                <span class="k">{TOPICS[post.data.topic]}</span>
+                <span class="t">{post.data.title}{post.data.draft && <span class="draft-badge">Draft</span>}</span>
+                <span class="d"><time datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time></span>
+              </a>
+            </li>
+          ))}
+          {latest.length === 0 && <li class="posts-empty">Writing is on the way — the first posts are being racked and stacked.</li>}
+        </ul>
+        <a class="all" href="/writing">All posts</a>
+      </section>
+
+      <section class="elsewhere wrap" id="elsewhere">
+        <a href="https://stratora.io"><span class="name">Stratora</span><span class="what">The company I founded. On-premises network and infrastructure monitoring for IT and OT environments.</span></a>
+        <a href="https://djneventproductions.com/"><span class="name">DJN Event Productions</span><span class="what">DJ, lighting and event production for live shows.</span></a>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    import { initRack } from '../scripts/rack';
+    initRack();
+  </script>
+</Base>

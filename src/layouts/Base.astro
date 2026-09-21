@@ -1,0 +1,56 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const path = Astro.url.pathname;
+const current = (prefix: string) =>
+  path === prefix || (prefix !== '/' && path.startsWith(prefix)) ? 'page' : undefined;
+---
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="vNick.io" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="alternate" type="application/rss+xml" title="vNick.io — Writing" href="/rss.xml" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap" rel="stylesheet" />
+</head>
+<body>
+<slot name="backdrop" />
+
+<header class="bar">
+  <a class="mark" href="/">vNick.io</a>
+  <nav aria-label="Main">
+    <a href="/writing" aria-current={current('/writing')}>Writing</a>
+    <a href="/#infrastructure">Topics</a>
+    <a href="/about" aria-current={current('/about')}>About</a>
+    <a class="ext" href="https://stratora.io">Stratora ↗</a>
+    <a class="ext" href="https://djneventproductions.com/">DJN ↗</a>
+  </nav>
+</header>
+
+<slot />
+
+<footer>
+  <span>© {new Date().getFullYear()} vNick.io, Long Island, New York</span>
+  <span>Built with Astro, hosted on GitHub Pages</span>
+</footer>
+</body>
+</html>
