@@ -1,0 +1,177 @@
+---
+title: "The venue is a lighthouse"
+description: "More than a decade of lighting, video and production networking for the Huntington Lighthouse Music Fest — a concert played from the roof of an offshore lighthouse to an audience of boats."
+date: 2026-09-21
+topic: lighting
+draft: true
+---
+
+import PhotoSlideshow from '../../components/PhotoSlideshow.astro';
+import lighthouseNight from '../../assets/lighthouse/lighthouse-night.jpeg';
+import dockLoadIn from '../../assets/lighthouse/dock-load-in.jpeg';
+import lineArraysBarge from '../../assets/lighthouse/line-arrays-barge.jpeg';
+import powerDistro from '../../assets/lighthouse/power-distro.jpeg';
+import lightingConsole from '../../assets/lighthouse/lighting-console.jpeg';
+import duskWash from '../../assets/lighthouse/dusk-wash.jpeg';
+import kayaksBeach from '../../assets/lighthouse/kayaks-beach.jpeg';
+import loadInTruck from '../../assets/lighthouse/load-in-truck.jpeg';
+
+Every Labor Day weekend for more than a decade, I've helped put a rock concert
+on the roof of a lighthouse.
+
+Not a lighthouse-themed stage. An actual working lighthouse — the Huntington
+Harbor Lighthouse, sitting offshore in Huntington Bay. The Huntington
+Lighthouse Preservation Society runs a music festival there, and it has grown
+into the Society's largest annual fundraiser and a genuine Long Island boating
+tradition. Bands play from the roof from around 11 a.m. until dusk, and the
+audience floats: boats, kayaks, paddleboards, anything that holds a person,
+rafted up around the lighthouse in Huntington Bay and Lloyd Harbor. Public
+accounts have put the crowd in the thousands, with well over a thousand
+vessels some years.
+
+From the water it looks effortless. From the production side, it's the most
+instructive venue I've ever worked, because it starts with nothing and
+everything has to be built.
+
+<PhotoSlideshow
+  images={[
+    { src: lighthouseNight, alt: 'The lighthouse at night: green wash moving across the stone, the rooftop stage tent glowing blue, all of it reflected in the bay.' },
+    { src: dockLoadIn, alt: 'Load-in day: gear staged on the dock in the sun, covers still on, the lighthouse waiting at the end of the jetty.' },
+    { src: lineArraysBarge, alt: 'Line-array hangs strapped down on timber cribbing for the ride across the harbor.' },
+    { src: powerDistro, alt: 'Power distribution racked and cabled on the dock, water on both sides.' },
+    { src: lightingConsole, alt: 'The lighting control position at night: cue grid on the laptop, pad and keyboard controllers in the flight case, stone stairs behind.' },
+    { src: duskWash, alt: 'Dusk, when the architectural lighting starts to take over the stonework.' },
+    { src: kayaksBeach, alt: "Part of the audience's parking lot: kayaks and paddleboards stacked on the beach, boats moored beyond." },
+    { src: loadInTruck, alt: 'The other end of the supply chain: the beach lot at the start of load-in.' },
+  ]}
+/>
+
+## Why this venue is hard
+
+Start with what the lighthouse doesn't have. Historically it has lacked
+dependable power for anything like concert production. There's no loading
+dock, no house rig, no FOH position with sight lines, no closet with a patch
+panel. There is stone, water, and stairs.
+
+So everything comes by boat. Loudspeakers, instruments, cabling, generators,
+lighting, video, network gear, and every person who will touch any of it —
+all of it crosses the water, gets handed up onto the rock, and then gets
+carried up through the lighthouse to where it's needed. The stage is the
+roof. Front of house mixes several stories below the performance area, which
+means the people mixing the show can't simply look at the band, and every
+line between the two has to be run through a building that was never meant
+to host either of them.
+
+Then, at the end of the weekend, the entire venue has to disappear again.
+
+## The network
+
+My corner of this, alongside lighting and video, is the communications
+infrastructure: a temporary LAN, WAN and cellular setup that has to carry
+video, the livestream, production systems and general Internet connectivity
+from a site that offers none of its own.
+
+The backbone is wired and deliberately simple. We pull CAT6 to every fixed
+endpoint, a couple of Ubiquiti UniFi access points handle Wi-Fi, and
+unmanaged Netgear PoE switches carry the LAN — including the control network
+for the lighting rig. Nothing on that rock needs a managed feature set; it
+needs to work wet.
+
+The WAN is the part people don't believe: there is no circuit to order for a
+rock in the bay. Connectivity is cellular, through a CradlePoint E3000
+carrying both T-Mobile and Verizon Wireless SIMs. It fails over automatically
+to whichever carrier is showing the better connection at that moment — lower
+packet loss, lower jitter — so neither network is a single point of failure.
+The CradlePoint handles both the WAN and the LAN for video streaming.
+
+Audio keeps to its own island: a small wireless router of its own, with a
+full-size Behringer X32 at front of house and a second X32 handling monitor
+world up top with the performers.
+
+Power starts on the barge. The main distro rides out there with the line
+arrays and a large-format generator, and feeds two pagodas on the lighthouse
+itself over three-phase five-wire camlock — lighting, audio and video power,
+each with its own path.
+
+> **PHOTO (Nick):** the network position — the CradlePoint and the rest of
+> the network gear wherever it lives during the show.
+
+## Lighting and video
+
+The other half of my job starts when the sun goes down. The lighthouse itself
+is the set piece, so we light it architecturally — washes across the
+stonework that read from a boat hundreds of feet away. The building becomes
+the backdrop, the lens and the landmark all at once.
+
+The architectural rig is twenty-eight washes surrounding the building:
+fourteen Chauvet WashFX and WashFX2 units alongside fourteen SHEHDS RGBAW+UV
+fixtures, uplighting the stone and picking out the architectural pieces. On
+top of that, four Chauvet Intimidator 140SR hybrids run the psychedelic
+gobos across the building and the aerial effects over it.
+
+> **TODO (Nick):** what console or control surface runs the lighting rig.
+
+Video rides the same infrastructure: four GoPro Hero cameras come back over
+HDMI-to-CAT6 balluns into a Blackmagic ATEM Mini Pro, with two laptops on the
+switcher for monitoring, streaming and content. While the stream is live,
+someone is in the chatroom the whole time, taking questions and reading
+donations in real time — it's a fundraiser first. Alongside that runs
+multichannel audio recording of the sets. The audio side of the production
+has included Meyer Sound line arrays with fills, professional mixing and
+monitoring, and distributed audio built to carry concert-level sound across
+open water — a very different acoustic problem than any room, because there
+is no room.
+
+> **PHOTO (Nick):** the view from the roof during a set — band in the
+> foreground, boats to the horizon.
+
+## The crew
+
+None of this is mine alone, and it didn't start with me. Donald Davidson and
+HDH Davidson Entertainment got involved near the festival's beginning and
+took on sound, lighting, production, livestreaming and much of the technical
+logistics. As technical director, Donald grew it from a modest event into a
+large concert running on professional touring-grade gear. He passed away in
+2023. His son Harley worked the festival at his side from the beginning, and
+he leads the production now — which feels less like a change of command than
+a continuation.
+
+I've worked this show with Harley and the HDH crew for more than a decade.
+My primary lanes are lighting design and operation, and the video and network
+infrastructure; beyond that I do what everyone on a crew this size does —
+cabling, rigging, electrical distribution, load-in and load-out — under
+Harley's leadership.
+
+## What the lighthouse taught me
+
+My day job is infrastructure architecture: data centers, networks,
+virtualization, disaster recovery. The lighthouse is the same discipline with
+the abstraction stripped off.
+
+Every dependency is visible. The power is a generator you carried in. The
+uplink is two SIM cards and physics. The cable plant is CAT6 you pulled
+through a stone stairwell yourself, and if a run fails there is no spare in a
+closet — the closet is on shore. You design for failure differently when the
+failure domain is a building surrounded by water and the maintenance window
+is a band's set change.
+
+It's also the best argument I know that "IT infrastructure" and "production"
+aren't different careers. The show needs a network engineer; the network
+exists to carry a show. Standing at a lighting console watching a wash roll
+across a hundred-year-old lighthouse, on a network you built that morning,
+the overlap stops being a novelty and starts being the job.
+
+If you want the one lesson, it isn't sophisticated: expect the unexpected.
+Everything is more difficult when it's windy, wet and raining, there's no
+permanent power, and the facilities are porta-potties on a rock. Design for
+that day, because that's the day you'll get.
+
+## An intermission
+
+The 2024 festival was the 15th edition — and, for now, the most recent one.
+Music Fest has been on hold in 2025 and 2026 while major restoration work
+happens at the lighthouse. The right call: the venue comes first, and this
+one has been standing in salt water for over a century.
+
+When the lighthouse is ready, the barges will load out from the beach again.
+I'll be on one of them, with a spool of CAT6.

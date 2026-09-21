@@ -1,0 +1,84 @@
+---
+/**
+ * Small photo slideshow / picture selector for posts.
+ * Without JavaScript the photos render as a plain stacked gallery; with it,
+ * one photo shows at a time with prev/next buttons and a dot selector.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  images: { src: ImageMetadata; alt: string }[];
+}
+const { images } = Astro.props;
+---
+<figure class="slideshow" data-slideshow>
+  <div class="slides">
+    {images.map((img, i) => (
+      <div class="slide" data-slide data-active={i === 0 ? 'true' : undefined}>
+        <Image
+          src={img.src}
+          alt={img.alt}
+          widths={[480, 880, 1600]}
+          sizes="(min-width: 960px) 870px, calc(100vw - 48px)"
+          loading={i === 0 ? 'eager' : 'lazy'}
+        />
+      </div>
+    ))}
+  </div>
+  <figcaption class="bar">
+    <button type="button" class="nav" data-prev aria-label="Previous photo">‹</button>
+    <span class="caption" data-caption aria-live="polite"></span>
+    <button type="button" class="nav" data-next aria-label="Next photo">›</button>
+  </figcaption>
+  <div class="dots" data-dots></div>
+</figure>
+
+<style is:global>
+.slideshow{ margin:2.2em 0; }
+.slideshow .slide img{ width:100%; height:auto; display:block; border-radius:14px; border:1px solid var(--line); background:#15171b; }
+.slideshow .slide + .slide{ margin-top:14px; } /* no-JS: stacked gallery */
+.slideshow[data-js] .slide{ display:none; }
+.slideshow[data-js] .slide[data-active]{ display:block; }
+.slideshow[data-js] .slide + .slide{ margin-top:0; }
+.slideshow[data-js] .slide img{ aspect-ratio:4/3; object-fit:contain; } /* stable frame across portrait/landscape */
+.slideshow .bar{ display:none; }
+.slideshow[data-js] .bar{ display:flex; align-items:center; gap:14px; margin:12px 0 0; }
+.slideshow .nav{ font:inherit; font-size:20px; line-height:1; cursor:pointer; color:var(--text); background:var(--graphite-2); border:1px solid var(--line); border-radius:999px; width:36px; height:36px; flex:none; }
+.slideshow .nav:hover{ border-color:var(--steel); }
+.slideshow .caption{ flex:1; font-size:14px; color:var(--steel); text-align:center; }
+.slideshow .dots{ display:none; }
+.slideshow[data-js] .dots{ display:flex; gap:8px; justify-content:center; margin-top:10px; }
+.slideshow .dots button{ width:10px; height:10px; border-radius:50%; border:1px solid var(--steel); background:transparent; cursor:pointer; padding:0; }
+.slideshow .dots button:hover{ border-color:var(--text); }
+.slideshow .dots button[aria-current="true"]{ background:var(--signal); border-color:var(--signal); }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-slideshow]').forEach((root) => {
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-slide]')];
+    if (slides.length < 2) return;
+    root.dataset.js = 'true';
+    const caption = root.querySelector('[data-caption]') as HTMLElement;
+    const dotsWrap = root.querySelector('[data-dots]') as HTMLElement;
+    let current = 0;
+    const dots = slides.map((_, n) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', `Photo ${n + 1} of ${slides.length}`);
+      b.addEventListener('click', () => show(n));
+      dotsWrap.append(b);
+      return b;
+    });
+    function show(n: number): void {
+      current = (n + slides.length) % slides.length;
+      slides.forEach((s, k) => s.toggleAttribute('data-active', k === current));
+      dots.forEach((d, k) => d.setAttribute('aria-current', String(k === current)));
+      const img = slides[current].querySelector('img');
+      caption.textContent = `${current + 1} / ${slides.length} — ${img?.alt ?? ''}`;
+    }
+    (root.querySelector('[data-prev]') as HTMLElement).addEventListener('click', () => show(current - 1));
+    (root.querySelector('[data-next]') as HTMLElement).addEventListener('click', () => show(current + 1));
+    show(0);
+  });
+</script>
