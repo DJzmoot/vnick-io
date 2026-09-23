@@ -1,0 +1,54 @@
+---
+import Diagram from '../Diagram.astro';
+---
+<Diagram caption="The shape most buildings end up with. The MDF takes the carrier entrance and the core; IDFs exist because horizontal copper runs out long before the building does; fiber ties them together. Getting these three rooms in the right places is most of the design, and it happens on paper.">
+  <svg viewBox="0 0 760 430" role="img" aria-labelledby="bbTitle bbDesc">
+    <title id="bbTitle">Building backbone: MDF, IDFs, copper reach and fiber</title>
+    <desc id="bbDesc">
+      A building outline containing a central MDF and two IDFs at either end. A dashed
+      circle around each room shows the area its horizontal copper can reach, with the
+      circles overlapping so no part of the floor is left uncovered. Fiber links run from
+      the MDF to each IDF. The carrier entrance comes through the building wall nearest
+      the MDF and connects to it.
+    </desc>
+
+    <!-- building shell -->
+    <rect class="shell" x="20" y="60" width="720" height="300" rx="10" />
+    <text class="panel-title" x="30" y="46">THE BUILDING</text>
+
+    <!-- horizontal copper reach -->
+    <circle class="reach" cx="160" cy="218" r="130" />
+    <circle class="reach" cx="385" cy="218" r="130" />
+    <circle class="reach" cx="610" cy="218" r="130" />
+    <text class="sub" x="160" y="106" text-anchor="middle">horizontal copper reach</text>
+
+    <!-- fiber backbone -->
+    <line class="link-active" x1="205" y1="218" x2="340" y2="218" />
+    <line class="link-active" x1="430" y1="218" x2="565" y2="218" />
+    <text class="tag" x="272" y="210" text-anchor="middle">fiber</text>
+    <text class="tag" x="498" y="210" text-anchor="middle">fiber</text>
+
+    <!-- rooms -->
+    <rect class="node-edge" x="115" y="190" width="90" height="56" rx="8" />
+    <text class="label" x="133" y="214">IDF A</text>
+    <text class="sub" x="133" y="231">access layer</text>
+
+    <rect class="node-edge" x="340" y="190" width="90" height="56" rx="8" />
+    <text class="label" x="360" y="214">MDF</text>
+    <text class="sub" x="360" y="231">core · demarc</text>
+
+    <rect class="node-edge" x="565" y="190" width="90" height="56" rx="8" />
+    <text class="label" x="583" y="214">IDF B</text>
+    <text class="sub" x="583" y="231">access layer</text>
+
+    <!-- carrier entrance -->
+    <line class="link" x1="385" y1="246" x2="385" y2="360" />
+    <line class="link" x1="385" y1="396" x2="385" y2="360" />
+    <path class="link" d="M379 368 L385 360 L391 368" />
+    <circle class="junction" cx="385" cy="360" r="5" />
+    <text class="sub" x="385" y="412" text-anchor="middle">carrier entrance and demarc — conduit to the MDF</text>
+
+    <!-- the far corner problem -->
+    <text class="sub" x="700" y="86" text-anchor="end">the far corner is further than it looks</text>
+  </svg>
+</Diagram>

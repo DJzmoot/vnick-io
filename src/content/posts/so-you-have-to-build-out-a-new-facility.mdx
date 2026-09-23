@@ -1,0 +1,377 @@
+---
+title: "So you have to build out a new facility"
+description: "A field guide to the infrastructure work behind a new building: drawings, MDF and IDF placement, power and cooling, structured cabling, carrier lead times, the LAN and fiber backbone, Ekahau Wi-Fi design, coordinating the trades, and commissioning what actually got built."
+date: 2026-09-23
+topic: network
+draft: false
+---
+
+import BuildingBackbone from '../../components/diagrams/BuildingBackbone.astro';
+
+At some point in an infrastructure career, somebody is going to hand you a
+floor plan.
+
+It might be an empty warehouse, a new office, a manufacturing facility, a
+sales center. Maybe it's new construction and the walls don't exist yet.
+Maybe somebody signed a lease on an existing building and construction starts
+next month. Either way the conversation usually sounds like "we need IT to
+get the building ready."
+
+If you've never done one before, it's easy to hear that as a networking
+project. You need some switches, a firewall, Wi-Fi, Internet circuits and a
+server room. Done. Except you have just become involved with electrical,
+HVAC, construction, structured cabling, Internet carriers, architects,
+general contractors, low-voltage contractors, facilities, security, AV, fire
+protection, and probably several other groups that haven't introduced
+themselves yet.
+
+I've been involved in building out hundreds of facilities — offices,
+healthcare, finance, legal, manufacturing, warehousing, logistics,
+engineering. Some were a few rooms and a network rack. Others involved large
+server rooms, multiple IDFs, manufacturing floors, warehouses, redundant
+carriers, hundreds of drops, and wireless designs that had to support
+everything from laptops to handheld RF scanners. The technology changes
+between those buildings. The process really doesn't.
+
+This is the guide I'd give someone getting thrown into their first one.
+
+1. Get the drawings
+2. Design the MDF and server room
+3. Figure out whether you need IDFs
+4. Plan power and electrical
+5. Calculate cooling and HVAC
+6. Design the structured cabling plant
+7. Order Internet circuits early
+8. Design the LAN and fiber backbone
+9. Design Wi-Fi with Ekahau
+10. Plan for everything else that uses the network
+11. Coordinate the trades
+12. Walk the site
+13. Commission and document everything
+
+Before any of it, though, there's one idea that reorders how you think about
+the whole project: you're not designing a network inside a finished building.
+You're helping design the building that the network will eventually live in.
+
+## 1. Get the drawings
+
+Start here. Before I choose a switch, an access point or a rack, I want the
+architectural drawings. At minimum dimensioned floor plans, and depending on
+the project, reflected ceiling plans, electrical drawings, mechanical drawings
+and furniture layouts become useful very quickly. Get the actual CAD files
+when you can, not a PDF somebody exported six months ago.
+
+The floor plan becomes the common reference for nearly everything that
+follows. Where is the MDF? Where could IDFs go? Where are the offices, the
+conference rooms, the manufacturing lines, the warehouse racks, the loading
+docks? Where are the printers, kiosks, TVs, cameras and access-control panels
+going? Where do the carriers enter the building?
+
+You will eventually put an alarming number of colored dots on this drawing.
+Keep it.
+
+## 2. Design the MDF and server room
+
+For most facilities I've designed, the MDF and the server room are the same
+room, and it's the center of the building's infrastructure. Carrier
+demarcations terminate there. The core lives there. Fiber to the IDFs
+originates there. Depending on the facility, so do servers, storage, UPS
+systems and security infrastructure. Which makes choosing that room one of
+the most consequential decisions in the whole design.
+
+I want it reasonably central, but central isn't the only question. Can the
+carriers reach it? Can sufficient electrical service reach it? Can we cool
+it? Is there plumbing above it? Can equipment physically get into it — not
+just the rack, but the pallet it arrives on? Is the room large enough to work
+behind the racks? Can another rack be added later? Does the door swing into
+space you needed?
+
+And perhaps most importantly: does everyone understand that this is not a
+storage closet? Server rooms have an extraordinary ability to accumulate
+folding chairs, Christmas decorations, marketing materials and six boxes of
+toner. Treat it as dedicated infrastructure space from the first meeting,
+because the precedent gets set early and it is much harder to reclaim the
+room later.
+
+Then lay it out properly. Where are the racks, the ladder rack or overhead
+tray, the electrical panels and receptacles, the UPS systems? Where does
+carrier equipment mount? Where does the fiber come in, and the copper
+bundles? Where does the cooling equipment go?
+
+Don't design the room around today's twelve rack units of equipment.
+Buildings have much longer lifecycles than switches do. Empty rack space is
+cheap during construction; finding another six square feet five years later
+is not.
+
+## 3. Figure out whether you need IDFs
+
+Now start looking at distance, because your horizontal copper plant has
+limits and the building doesn't care about them. Once runs from the MDF get
+too long, you need another telecommunications room — an IDF. The MDF stays
+the center of the network while one or more IDFs extend the access layer out
+into the rest of the facility.
+
+<BuildingBackbone />
+
+This comes up constantly in warehouses and manufacturing plants. On a floor
+plan a building can look perfectly manageable, and then you scale the drawing
+and realize the far corner is several hundred feet away. Your cable isn't
+flying diagonally across open space either — it follows trays, corridors,
+structural pathways and vertical transitions, and all of that counts.
+
+Don't design right up against the maximum distance. Leave margin.
+
+An IDF needs most of the same considerations the MDF did: space, cooling,
+electrical service, UPS, physical access, room to grow. Then connect it back
+to the MDF with fiber, and pull more strands than you need today. Fiber is
+inexpensive while the contractor is already standing there with a spool. It
+gets considerably more expensive when everyone has to come back.
+
+## 4. Plan power and electrical
+
+You're now going to spend some quality time with the electrician, and the
+single most useful thing you can do is give them actual requirements rather
+than "we need power for the racks." What voltage, what amperage, how many
+circuits, what receptacles, and where? Which equipment needs redundant power?
+How large are the UPS systems? Are there separate A and B feeds? Does the
+facility have generator power, and which circuits sit behind it?
+
+You need to calculate this. Servers, storage, firewalls and switches all
+consume power, and modern PoE switching can consume a lot of it. The switch
+itself may not be electrically interesting until you hang dozens of access
+points, phones and cameras off it, at which point the power budget matters
+quite a bit more than the spec sheet suggested.
+
+One thing worth internalizing early: redundant power supplies don't create
+redundant power. If PSU 1 and PSU 2 eventually land on the same breaker, you
+have two power cords, not two power paths. Sometimes genuine electrical
+redundancy isn't practical for the building, and that's a legitimate outcome
+— just make sure you know which failure domains actually exist rather than
+which ones the equipment implies.
+
+## 5. Calculate cooling and HVAC
+
+Everything you just powered is going to turn most of that electricity into
+heat, so now you're talking to HVAC. You can estimate the equipment heat load
+from the expected electrical load and translate that into the cooling
+capacity the room needs, but don't stop at the BTU calculation. Ask how the
+building's HVAC actually operates.
+
+Does it shut down at night? Does it change setpoints on weekends? Is the
+server room on the same zone as occupied office space? Where is the
+thermostat? What happens on Christmas Day, when nobody is in the building but
+every switch and server is still running?
+
+A vent in the ceiling does not constitute a server-room cooling design. For
+rooms with meaningful equipment loads, dedicated cooling usually earns its
+cost. The requirement is that the room stays inside its environmental limits
+regardless of whether Karen from accounting is currently at her desk. The
+servers do not know that the building is closed.
+
+## 6. Design the structured cabling plant
+
+Now bring in the low-voltage contractor, and start covering those floor plans
+in dots. Every drop should be planned: desks, printers, conference rooms,
+access points, cameras, phones, TVs, digital signage, kiosks, manufacturing
+equipment, warehouse equipment, building-management systems, access control,
+and anything else with an Ethernet port.
+
+My rule is simple. If it doesn't move and running a cable is reasonable, run
+a cable. Wi-Fi isn't a substitute for structured cabling; it's another access
+medium, and it still needs cable to reach every access point.
+
+You also need to define the cable specification, the patch panels, racks,
+pathways, cable management and the labeling standard. That last one matters
+more than it sounds like it does. `MDF-PP01-24` tells me something. "Jack 73"
+tells me that somebody, somewhere, probably has a spreadsheet. Label both
+ends, label the faceplate, label the patch panel, and make the documentation
+agree with the labels.
+
+Then require certification results — copper certified to the appropriate
+standard, and the fiber tested too. The person who installed the cable should
+not be the only person on earth capable of working out where it goes.
+
+## 7. Order Internet circuits early
+
+Ignore the section number on this one. Do it as soon as you know the address.
+
+Carrier timelines can be ridiculous, and a building can have furniture,
+computers, racks, switches and perfectly functional Wi-Fi while still not
+being operational because somebody is waiting on a construction crew to bore
+underneath a parking lot. None of your work saves you from that; only lead
+time does.
+
+Figure out which carriers actually service the facility. Get quotes. Find out
+what construction is required, where the demarcations will be, and how the
+circuits will physically enter the building. Make sure conduit exists from the
+carrier entrance to the MDF — that is a cheap thing to specify during
+construction and a genuinely expensive thing to add afterwards.
+
+If you're ordering redundant carriers, investigate whether they're physically
+redundant. Two ISP invoices do not necessarily mean two independent paths. If
+both circuits enter through the same conduit, use the same pole line, or
+ultimately ride the same last-mile infrastructure, your logical redundancy can
+disappear with one backhoe. Sometimes real path diversity isn't available at
+that address, which is useful information in its own right. The point is to
+know which one you're buying.
+
+## 8. Design the LAN and fiber backbone
+
+Now we finally get to buy some switches. Notice how far down the list we are.
+
+By this point you should understand the physical topology of the building
+well enough that the logical topology mostly falls out of it. The MDF is the
+center, IDFs connect back over fiber, and access switching lives wherever it
+has to live to serve the cable plant. From there you're working out uplink
+capacity, redundancy, switch counts, port density and PoE requirements.
+
+Count your ports — then don't buy exactly that many. The facility will change
+roughly seventeen minutes after opening. Someone will add cameras. Someone
+will move a printer. Facilities will install a controller nobody mentioned. A
+department will hire twenty people. Leave capacity, and apply the same logic
+to fiber: a six-strand cable may satisfy the drawing today, but more strands
+are cheap insurance against a building that has every intention of changing.
+
+## 9. Design Wi-Fi with Ekahau
+
+Do not design Wi-Fi by spacing circles evenly across a floor plan, and don't
+let the electrician choose access point locations because those spots were
+convenient for pulling cable.
+
+I use Ekahau for both predictive design and measured surveys, and the
+predictive design comes first. Import the floor plan, scale it correctly, draw
+the walls and assign realistic building materials — concrete, drywall, glass,
+block and metal all attenuate RF differently, and if you're designing a
+warehouse, model the racks too. Then define the actual requirements: coverage,
+capacity, client types, applications, expected density, roaming behavior.
+
+Only then place the APs. Ekahau lets you model the expected RF environment
+before a single access point is mounted, so you can evaluate signal strength,
+secondary coverage, channel relationships and capacity, and adjust while
+adjusting is free. It also gives the low-voltage contractor exact AP
+locations, which matters, because "somewhere around here" has an amazing
+tendency to become "directly above the new HVAC duct."
+
+But predictive design is still predictive, and eventually physics gets a vote.
+Once the building is substantially complete and the network is running, go
+back with Ekahau and perform a measured survey. Walk the building — actually
+walk it. Offices, conference rooms, hallways, production floors, warehouse
+aisles, loading areas, and the weird corner behind the machine where nobody
+thinks anyone needs Wi-Fi until someone puts a scanner there.
+
+Now you're measuring the building that exists rather than the one that was
+drawn. Maybe the contractor used a different wall material. Maybe the shelving
+changed. Maybe machinery was added. The predictive survey was the design; the
+measured survey is the verification. You need both.
+
+### A note about warehouses
+
+Warehouses deserve special attention, because an empty warehouse and a full
+warehouse are completely different RF environments — and so are the top and
+bottom of the same aisle. Racks full of liquid, metal components or dense
+product will change propagation in ways the empty building never hinted at.
+
+Think about where the clients actually operate. If employees use rugged
+handheld scanners three feet off the floor between racks of product, that's
+the environment I care about — not what my laptop sees while I'm standing six
+feet tall in the middle of an empty aisle. Client radios aren't equal either.
+The shiny new laptop you tested with may have a significantly better radio
+than the ten-year-old rugged scanner the business actually depends on. Design
+for the clients that matter, and measure where those clients work.
+
+## 10. Plan for everything else that uses the network
+
+The network has quietly become the nervous system of the building, which
+means everyone eventually wants something from it: security cameras, badge
+readers, door controllers, HVAC controls, lighting controls, AV and
+conference rooms, digital signage, time clocks, printers, manufacturing
+equipment, warehouse scanners, guest Wi-Fi, assorted IoT, and vendor
+equipment of every description.
+
+Some of those systems belong to IT. Some belong to facilities. Some belong to
+security. And some belong to an outside vendor who will tell you they need
+"an Internet connection," then arrive with six devices, a switch of their own
+and a requirement for three static IP addresses nobody mentioned. Ask early,
+and ask specifically.
+
+## 11. Coordinate the trades
+
+This may be the most important part of the entire project, because your
+design intersects everyone else's: the architect, general contractor,
+electrician, HVAC contractor, low-voltage contractor, carriers, security
+vendor, AV contractor, facilities, fire protection, furniture installers.
+
+Sometimes all of them are working from slightly different revisions of the
+same building. That's how the electrical drawing ends up showing a rack in
+one location while the low-voltage drawing shows it six feet away and the
+mechanical drawing puts an air handler above both of them. Nobody necessarily
+made a mistake. Their drawings just never met.
+
+Make them meet. Review drawings, attend construction meetings when it's
+appropriate, answer RFIs, mark up plans, ask questions. Make sure everyone
+understands where the infrastructure is going before somebody drills, pours,
+frames or closes something expensive to change. Catching a collision in
+Bluebeam costs essentially nothing. Catching it after drywall costs
+considerably more.
+
+## 12. Walk the site
+
+Then get out of the drawings. I like walking these projects several times.
+
+Early on you're validating assumptions. Where is the carrier entrance, really?
+Where is electrical service? What does the MDF actually look like now that it
+exists? Are the proposed IDF locations reasonable in person? Where will the
+pathways run?
+
+During construction, walk it again. Look at the cable trays and the conduits.
+Look at the MDF and every IDF. Look at where AP cables are actually landing.
+Check rack clearances. Find the things that aren't being built quite the way
+the drawing suggested they would be. This is normal — buildings are messy,
+and that's exactly why you're there.
+
+## 13. Commission and document everything
+
+Eventually somebody declares the building finished, and IT should verify that
+claim independently.
+
+Check the racks, the power, the UPS systems, the cooling. Check the fiber and
+review the copper certification results. Verify patch-panel labeling and the
+carrier demarcations. Test failover by actually causing one. Check every IDF.
+Verify AP locations, run the measured Ekahau survey, and test roaming with the
+devices the business genuinely uses rather than the one in your bag. Test the
+awkward places: the loading dock, the conference rooms, the far end of the
+warehouse.
+
+Then update the documentation to reflect what was built, not what Revision 7
+of the construction drawing said would be built. Keep the floor plans, the
+rack elevations, the cable schedules, the fiber documentation, the Ekahau
+project, the circuit information, carrier contacts and account numbers, UPS
+details, switch locations and serial numbers. Document the things Future You
+would otherwise spend four hours rediscovering.
+
+## You're building more than the network
+
+The first time somebody asks you to build out a facility, the sheer number of
+moving pieces is intimidating. That's normal, and it passes.
+
+You don't need to be an electrician, HVAC engineer, architect, general
+contractor and low-voltage technician simultaneously. You need to understand
+where their work intersects yours. You need to tell the electrician what the
+infrastructure requires, tell HVAC how much heat you're expecting, tell the
+low-voltage contractor where cables need to go, tell the carrier where you
+need the demarc, and tell the architect how much room the MDF needs. And
+sometimes you need to get all five of them standing around the same floor
+plan at the same time. That turns out to be a surprisingly large part of
+infrastructure architecture.
+
+Eventually construction ends. The racks fill up, the switches boot, the access
+points come online, the users move in. And if you did all of this correctly,
+almost nobody will notice. They'll plug in a laptop and get a network
+connection. They'll walk through the building and Wi-Fi will roam. A scanner
+will work at the far end of the warehouse. The server room will stay cool at
+two in the morning. A failed ISP will disappear behind the other circuit. And
+thousands of feet of cable will sit quietly above the ceiling doing exactly
+what it was designed to do.
+
+That's the goal. Because the best time to solve an infrastructure problem is
+while the entire building is still just lines on a drawing.
