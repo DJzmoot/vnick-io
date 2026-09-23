@@ -10,6 +10,7 @@ import BranchHa from '../../components/diagrams/BranchHa.astro';
 import TriWan from '../../components/diagrams/TriWan.astro';
 import Coexistence from '../../components/diagrams/Coexistence.astro';
 import HybridTransition from '../../components/diagrams/HybridTransition.astro';
+import SecureAccessHeadend from '../../components/diagrams/SecureAccessHeadend.astro';
 
 I've designed and implemented several large Cisco Meraki SD-WAN deployments
 now, across estates big enough that no single person could have touched every
@@ -276,6 +277,66 @@ redistribution had nothing left to redistribute and could come out.
 Designing the temporary state properly is just as important as designing the
 final one. You will live in the temporary state far longer.
 
+## When vMX wasn't an option
+
+One of the larger global deployments introduced a different kind of problem.
+We needed the SD-WAN fabric to reach several major data centers, and the
+obvious answer — put a vMX in front of them so they join the fabric like any
+other site — wasn't available to us. At the time of that project, vMX
+deployment was limited to the supported public cloud platforms: AWS, Azure,
+Google Cloud and Alibaba Cloud. The data-center environment we needed to
+connect wasn't one of them. That constraint was specific to that project and
+that point in time, and it's the kind of thing worth re-checking rather than
+assuming.
+
+We could have stood up a public-cloud presence purely to have somewhere to
+host a headend, but building out a cloud footprint to solve a routing problem
+for data centers that already existed is a strange amount of tail wagging a
+fairly large dog. So we bridged the two environments differently, using Cisco
+Secure Access as the connection point between the data centers and the Meraki
+estate.
+
+The data-center side of it is conventional, which is most of the appeal. Each
+data center brought up redundant IPsec tunnels toward Cisco Secure Access and
+ran eBGP across them, advertising its internal prefixes. Secure Access
+propagated those routes into the Meraki-connected environment, and routes
+from the SD-WAN side could be exchanged back toward the data centers where
+that made sense. Standard IPsec, standard eBGP, nothing exotic terminating on
+the data-center edge.
+
+<SecureAccessHeadend />
+
+What that bought us, beyond simply having a path, was not maintaining a large
+static route matrix between the data centers and the SD-WAN estate. Static
+routing at that scale is fine right up until the first subnet changes, at
+which point it becomes a permanent low-grade tax on everyone who touches the
+environment. Dynamic routing handled the exchange, and new data-center
+prefixes showed up in the fabric without anyone editing anything.
+
+The organization had locations across the United States, Canada, Mexico,
+Europe and APAC, so the design was deliberately regional. Cisco Secure Access
+offers connection points in many locations, and we paired them geographically
+rather than pointing everything at one place. Northeast sites preferred New
+York with Ashburn as the redundant region. Canadian sites used Toronto with
+Vancouver. West Coast locations used western regions such as Palo Alto and
+Los Angeles. The other regions followed the same logic, chosen on locality,
+latency and having the second choice fail in a different way than the first.
+
+The principle was that local sites should use nearby Secure Access regions
+rather than hairpinning traffic across a continent to reach a headend, while
+Secure Access itself acted as the dynamic route-exchange bridge into the
+major data centers. These are Cisco-hosted locations we connected into, not
+infrastructure we operated — which is the point. We got redundant regional
+termination and geographic resiliency without racking anything or taking on
+another environment to run.
+
+It also kept a clean line between the two routing domains. The branch SD-WAN
+fabric stayed a branch SD-WAN fabric; the data centers kept their own routing
+domain and their own edge; and the two exchanged exactly what they needed to
+exchange over a mechanism that scaled as more regions came online. That
+separation is worth as much as the connectivity, because it means neither
+side's future changes are automatically the other side's problem.
+
 ## Test the rollback, not just the rollout
 
 Pilot with small sites first. Then pilot with the awkward ones — the site
@@ -306,8 +367,9 @@ were sitting there. Prestaging hardware so site visits were assembly rather
 than engineering. Standardized addressing. Coexistence on the LAN. Routing
 designs that suited the site instead of the template. Hub topology that
 matched how the company actually works. Transitional routing that was
-deliberately designed. Cellular treated as estate-wide insurance. Extensive
-testing, including of the rollback.
+deliberately designed. A data-center bridge built out of standard IPsec and
+eBGP when the tidy option wasn't available to us. Cellular treated as
+estate-wide insurance. Extensive testing, including of the rollback.
 
 Meraki made the overlay straightforward, and that matters — it's why the
 fabric was the least eventful part of the project. But the reason these
