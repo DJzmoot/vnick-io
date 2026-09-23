@@ -1,5 +1,7 @@
 ---
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import logoFull from '../assets/brand/logo-full.png';
 import { getPosts, TOPICS, formatDate, isoDate } from '../lib/posts';
 
 const posts = await getPosts();
@@ -114,6 +116,10 @@ const personLd = {
         <a href="https://stratora.io"><span class="name">Stratora</span><span class="what">Founder. Self-hosted infrastructure monitoring and operational visibility for real-world IT and OT environments.</span></a>
         <a href="https://djneventproductions.com/"><span class="name">DJN Event Productions</span><span class="what">My company. Professional event production, and permanent AV, lighting and sound installation for venues.</span></a>
       </section>
+
+      <div class="signoff wrap">
+        <Image src={logoFull} alt="" widths={[520, 780, 1040]} sizes="520px" loading="lazy" />
+      </div>
     </div>
   </main>
 
