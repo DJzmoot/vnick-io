@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { person, website, graph, breadcrumb, PERSON_ID, SITE_ID, SITE_URL } from '../lib/seo';
+import { person, website, graph, breadcrumb, PERSON_ID, SITE_ID, SITE_URL, LINKEDIN_URL } from '../lib/seo';
 
 const jsonLd = graph(
   person,
@@ -25,7 +25,7 @@ const jsonLd = graph(
 ---
 <Base
   title="About Nick Manganiello — vNick.io"
-  description="Nick Manganiello (Nicolas Manganiello) is an infrastructure architect on Long Island, New York. How I got here: computers at five, DJing at eight, DJN Event Productions and IT consulting at fourteen, then enterprise infrastructure, theatrical production, facilities work, and Stratora."
+  description="Nick Manganiello is an infrastructure architect on Long Island, New York. How I got here: computers at five, DJing at eight, DJN Event Productions and IT consulting at fourteen, then enterprise infrastructure, theatrical production, facilities work, and Stratora."
 >
   <script type="application/ld+json" slot="head" set:html={jsonLd} />
 
@@ -35,8 +35,9 @@ const jsonLd = graph(
       <p class="termline">nick@vnick.io:~$ whoami</p>
       <div class="prose">
         <p>
-          I'm Nick Manganiello — Nicolas Manganiello on anything official, Nick
-          everywhere else. I've spent most of my life building systems.
+          I'm Nick Manganiello. You'll find Nicolas Manganiello on paperwork,
+          but Nick is what I go by. I've spent most of my life building
+          systems.
         </p>
         <p>
           I started experimenting with computers on Windows 95 around age five,
@@ -239,6 +240,15 @@ const jsonLd = graph(
           Away from the racks, I'm happily married to my wife Gina, we have
           one son, Luke, and there's my little buddy Rocco — a wheaten
           terrier.
+        </p>
+
+        <h2>Elsewhere</h2>
+        <p>
+          The writing lives at <a href="/writing">/writing</a> and selected
+          builds are on the <a href="/projects">projects</a> page. Otherwise
+          I'm on <a href={LINKEDIN_URL} rel="me">LinkedIn</a> and <a href="https://github.com/DJzmoot" rel="me">GitHub</a>,
+          and the companies are <a href="https://stratora.io">Stratora</a> and <a href="https://djneventproductions.com/">DJN Event Productions</a>.
+          Mail reaches me at <span class="term">nick@vnick.io</span>.
         </p>
 
       </div>

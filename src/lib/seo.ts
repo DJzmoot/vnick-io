@@ -12,8 +12,13 @@ export const SITE_ID = `${SITE_URL}/#website`;
 
 export const FULL_NAME = 'Nick Manganiello';
 
-/** Name variants people actually search for. */
-export const NAME_VARIANTS = ['Nicolas Manganiello', 'Nick Manganiello', 'vNick'];
+/**
+ * Other names people search for. Nick is what he goes by — these exist so a
+ * search for the formal name still resolves to the same person.
+ */
+export const NAME_VARIANTS = ['Nicolas Manganiello', 'vNick'];
+
+export const LINKEDIN_URL = 'https://www.linkedin.com/in/nick-manganiello/';
 
 export const person = {
   '@type': 'Person',
@@ -34,7 +39,12 @@ export const person = {
     addressRegion: 'NY',
     addressCountry: 'US',
   },
-  sameAs: ['https://stratora.io', 'https://djneventproductions.com/', 'https://github.com/DJzmoot'],
+  sameAs: [
+    LINKEDIN_URL,
+    'https://github.com/DJzmoot',
+    'https://stratora.io',
+    'https://djneventproductions.com/',
+  ],
   knowsAbout: [
     'Network infrastructure',
     'SD-WAN',
