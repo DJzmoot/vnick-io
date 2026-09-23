@@ -1,5 +1,7 @@
 ---
+import { Image } from 'astro:assets';
 import '../styles/global.css';
+import logoMark from '../assets/brand/logo-mark.png';
 
 interface Props {
   title: string;
@@ -8,6 +10,7 @@ interface Props {
 
 const { title, description } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL('/og-image.png', Astro.site);
 const path = Astro.url.pathname;
 const current = (prefix: string) =>
   path === prefix || (prefix !== '/' && path.startsWith(prefix)) ? 'page' : undefined;
@@ -26,7 +29,18 @@ const current = (prefix: string) =>
 <meta property="og:url" content={canonical} />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="vNick.io" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="vNick.io — design, build, control" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content={ogImage} />
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<meta name="theme-color" content="#1a1c20" />
 <link rel="alternate" type="application/rss+xml" title="vNick.io — Writing" href="/rss.xml" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <slot name="head" />
@@ -35,7 +49,9 @@ const current = (prefix: string) =>
 <slot name="backdrop" />
 
 <header class="bar">
-  <a class="mark" href="/">vNick.io</a>
+  <a class="mark" href="/">
+    <Image src={logoMark} alt="vNick.io" widths={[220, 330, 440]} sizes="150px" loading="eager" />
+  </a>
   <nav aria-label="Main">
     <a href="/writing" aria-current={current('/writing')}>Writing</a>
     <a href="/projects" aria-current={current('/projects')}>Projects</a>

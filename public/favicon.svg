@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- vNick.io — a tiny rack: three units, the middle one live -->
-  <rect width="64" height="64" rx="14" fill="#1a1c20"/>
-  <rect x="13" y="13" width="38" height="10" rx="3" fill="#33373e"/>
-  <rect x="13" y="27" width="38" height="10" rx="3" fill="#78be20"/>
-  <rect x="13" y="41" width="38" height="10" rx="3" fill="#33373e"/>
-  <circle cx="46" cy="18" r="2" fill="#78be20"/>
-  <circle cx="46" cy="46" r="2" fill="#78be20"/>
-</svg>
