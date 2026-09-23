@@ -1,0 +1,63 @@
+---
+import Diagram from '../Diagram.astro';
+---
+<Diagram caption="The remote-access direction the same architecture opens up — not something we have deployed. Landing a roaming user on the nearest Secure Access region removes the trip back to a fixed concentrator, which is the part that hurts when the user and the resource are both a long way from headquarters.">
+  <svg viewBox="0 0 760 214" role="img" aria-labelledby="raTitle raDesc">
+    <title id="raTitle">Possible future remote access: nearest Secure Access region instead of a fixed VPN concentrator</title>
+    <desc id="raDesc">
+      A possible future path: a roaming user in APAC connects to the nearest Cisco Secure
+      Access region, crosses the Secure Access backbone, and reaches the resource by the
+      geographically appropriate path. Shown beneath it, dimmed, is the pattern it avoids:
+      the same user tunnelling back to a VPN concentrator in New York only to return to a
+      resource in APAC.
+    </desc>
+
+    <text class="panel-title" x="14" y="26">POSSIBLE DIRECTION — NEAREST-REGION REMOTE ACCESS</text>
+
+    <rect class="node-edge" x="14" y="38" width="150" height="50" rx="8" />
+    <text class="label" x="28" y="60">Roaming user</text>
+    <text class="sub" x="28" y="77">in APAC</text>
+
+    <path class="link-standby" d="M164 63 L200 63" />
+    <path class="link-standby" d="M192 57 L200 63 L192 69" />
+
+    <rect class="node-edge" x="208" y="38" width="150" height="50" rx="8" />
+    <text class="label" x="222" y="60">Nearest Secure</text>
+    <text class="label" x="222" y="78">Access region</text>
+
+    <path class="link-standby" d="M358 63 L394 63" />
+    <path class="link-standby" d="M386 57 L394 63 L386 69" />
+
+    <rect class="node-edge" x="402" y="38" width="150" height="50" rx="8" />
+    <text class="label" x="416" y="60">Secure Access</text>
+    <text class="label" x="416" y="78">backbone</text>
+
+    <path class="link-standby" d="M552 63 L588 63" />
+    <path class="link-standby" d="M580 57 L588 63 L580 69" />
+
+    <rect class="node-edge" x="596" y="38" width="150" height="50" rx="8" />
+    <text class="label" x="610" y="60">Resource by the</text>
+    <text class="label" x="610" y="78">closest path</text>
+
+    <!-- what it avoids -->
+    <text class="panel-title" x="14" y="136">WHAT IT AVOIDS — TROMBONING TO A FIXED CONCENTRATOR</text>
+
+    <rect class="node" x="14" y="148" width="180" height="50" rx="8" />
+    <text class="sub" x="28" y="170">Roaming user</text>
+    <text class="sub" x="28" y="187">in APAC</text>
+
+    <path class="link-dim" d="M194 173 L282 173" />
+    <path class="link-dim" d="M274 167 L282 173 L274 179" />
+
+    <rect class="node" x="290" y="148" width="180" height="50" rx="8" />
+    <text class="sub" x="304" y="170">VPN concentrator</text>
+    <text class="sub" x="304" y="187">in New York</text>
+
+    <path class="link-dim" d="M470 173 L558 173" />
+    <path class="link-dim" d="M550 167 L558 173 L550 179" />
+
+    <rect class="node" x="566" y="148" width="180" height="50" rx="8" />
+    <text class="sub" x="580" y="170">Resource back</text>
+    <text class="sub" x="580" y="187">in APAC</text>
+  </svg>
+</Diagram>

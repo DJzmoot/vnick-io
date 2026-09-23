@@ -11,6 +11,7 @@ import TriWan from '../../components/diagrams/TriWan.astro';
 import Coexistence from '../../components/diagrams/Coexistence.astro';
 import HybridTransition from '../../components/diagrams/HybridTransition.astro';
 import SecureAccessHeadend from '../../components/diagrams/SecureAccessHeadend.astro';
+import FutureRemoteAccess from '../../components/diagrams/FutureRemoteAccess.astro';
 
 I've designed and implemented several large Cisco Meraki SD-WAN deployments
 now, across estates big enough that no single person could have touched every
@@ -330,12 +331,48 @@ infrastructure we operated — which is the point. We got redundant regional
 termination and geographic resiliency without racking anything or taking on
 another environment to run.
 
+The part I didn't fully appreciate until we were running on it is that Secure
+Access isn't only a set of regional termination points. Its locations are
+interconnected, so once traffic is inside the fabric, Cisco's backbone becomes
+available as another transport domain between regions. That changes the shape
+of long-haul traffic for a company with sites in the US, Canada, Mexico,
+Europe and APAC. An APAC office reaching something in the East Coast data
+center no longer depends entirely on whatever end-to-end Internet path it can
+get across the Pacific, or on whichever route our own overlay happens to
+produce that day. It can enter Secure Access locally, cross the backbone, and
+come out near the destination before making the IPsec and eBGP handoff into
+the data center.
+
+I want to be careful about how strongly I put that. This isn't a claim that
+every packet rides Cisco's backbone, or that Secure Access replaces Internet
+transit, or that you get a latency win in every direction — the honest
+version is that it gave us another way to carry long-distance traffic between
+regions, and for the intercontinental pairs that mattered it behaved better
+than relying solely on a public path from one side of the world to the other.
+On a global estate, having that option at all is worth something.
+
 It also kept a clean line between the two routing domains. The branch SD-WAN
 fabric stayed a branch SD-WAN fabric; the data centers kept their own routing
 domain and their own edge; and the two exchanged exactly what they needed to
 exchange over a mechanism that scaled as more regions came online. That
 separation is worth as much as the connectivity, because it means neither
 side's future changes are automatically the other side's problem.
+
+The same design leaves an obvious next step sitting there on the remote-access
+side, which we haven't taken yet. If client VPN moves into Secure Access,
+roaming users land on the region closest to them instead of tunnelling back
+to a fixed concentrator. That matters when the company is spread across five
+regions: a user in Singapore who needs something hosted in Singapore or Tokyo
+currently has a decent chance of crossing the Pacific twice to get it —
+out to a concentrator, then back again — which is a lot of geography for a
+file share.
+
+<FutureRemoteAccess />
+
+Whether it delivers depends on the specifics, like anything else; the point
+is that the architecture we built for the data centers happens to be the same
+architecture remote access would want, and that isn't always how these things
+line up.
 
 ## Test the rollback, not just the rollout
 

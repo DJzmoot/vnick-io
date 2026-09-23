@@ -1,78 +1,106 @@
 ---
 import Diagram from '../Diagram.astro';
 ---
-<Diagram caption="Bridging the fabric into the data centers. Regional Cisco Secure Access locations act as the connection points: sites use the geographically sensible pair, the data centers bring up redundant IPsec with eBGP across it, and prefixes are exchanged dynamically instead of by hand.">
-  <svg viewBox="0 0 760 340" role="img" aria-labelledby="saTitle saDesc">
-    <title id="saTitle">Cisco Secure Access as the route-exchange bridge between the Meraki SD-WAN fabric and the data centers</title>
+<Diagram caption="Sites enter Cisco Secure Access at a nearby region; the regions are interconnected by Cisco's backbone; and the data centers terminate redundant IPsec with eBGP on the regions closest to them. So an APAC site reaching the East Coast data center can enter locally, cross the backbone, and leave beside the destination rather than taking whatever long-haul path it would otherwise get.">
+  <svg viewBox="0 0 760 410" role="img" aria-labelledby="saTitle saDesc">
+    <title id="saTitle">Cisco Secure Access regions, the backbone between them, and the IPsec and eBGP handoff into the data centers</title>
     <desc id="saDesc">
-      Meraki branch regions — Northeast, Canada, West Coast, Europe and APAC — connect
-      through the Meraki SD-WAN fabric and use geographically paired Cisco Secure Access
-      locations, such as New York with Ashburn, Toronto with Vancouver, and Palo Alto with
-      Los Angeles. The major data centers establish redundant IPsec tunnels toward Cisco
-      Secure Access and run eBGP across them, advertising their internal prefixes. Routes
-      are exchanged dynamically in both directions rather than maintained as static routes.
+      Meraki site regions — Northeast, Canada, West Coast, Europe and APAC — each enter
+      Cisco Secure Access at a nearby region: New York with Ashburn, Toronto with
+      Vancouver, Palo Alto with Los Angeles, and regional pairs in Europe and APAC. Those
+      Secure Access regions are interconnected by Cisco's backbone, so long-haul traffic
+      can cross between regions inside the fabric. The East and West data centers
+      establish redundant IPsec tunnels with eBGP to the Secure Access regions nearest
+      them, and routes are exchanged dynamically rather than kept as static routes.
     </desc>
 
-    <!-- LEFT: meraki regions -->
-    <text class="panel-title" x="10" y="32">MERAKI SD-WAN FABRIC</text>
-    <rect class="panel" x="10" y="44" width="170" height="210" rx="12" />
-    <rect class="node" x="22" y="64" width="146" height="28" rx="6" />
-    <text class="label" x="36" y="83">Northeast</text>
-    <rect class="node" x="22" y="100" width="146" height="28" rx="6" />
-    <text class="label" x="36" y="119">Canada</text>
-    <rect class="node" x="22" y="136" width="146" height="28" rx="6" />
-    <text class="label" x="36" y="155">West Coast</text>
-    <rect class="node" x="22" y="172" width="146" height="28" rx="6" />
-    <text class="label" x="36" y="191">Europe</text>
-    <rect class="node" x="22" y="208" width="146" height="28" rx="6" />
-    <text class="label" x="36" y="227">APAC</text>
+    <!-- column titles -->
+    <text class="panel-title" x="10" y="40">MERAKI SITE REGIONS</text>
+    <text class="panel-title" x="228" y="40">CISCO SECURE ACCESS</text>
+    <text class="panel-title" x="610" y="40">DATA CENTERS</text>
 
-    <!-- gap 1 -->
-    <text class="sub" x="231" y="120" text-anchor="middle">preferred</text>
-    <text class="sub" x="231" y="134" text-anchor="middle">regional pair</text>
-    <path class="link" d="M180 152 L282 152" />
-    <path class="link" d="M188 146 L180 152 L188 158" />
-    <path class="link" d="M274 146 L282 152 L274 158" />
+    <!-- panels -->
+    <rect class="panel" x="10" y="52" width="140" height="296" rx="12" />
+    <rect class="panel" x="228" y="52" width="272" height="296" rx="12" />
+    <rect class="panel" x="610" y="52" width="140" height="296" rx="12" />
 
-    <!-- MIDDLE: secure access POPs -->
-    <text class="panel-title" x="282" y="32">CISCO SECURE ACCESS</text>
-    <rect class="panel" x="282" y="44" width="218" height="210" rx="12" />
-    <rect class="node-edge" x="294" y="62" width="194" height="44" rx="8" />
-    <text class="label" x="308" y="82">New York + Ashburn</text>
-    <text class="sub" x="308" y="98">Northeast pair</text>
-    <rect class="node-edge" x="294" y="116" width="194" height="44" rx="8" />
-    <text class="label" x="308" y="136">Toronto + Vancouver</text>
-    <text class="sub" x="308" y="152">Canada pair</text>
-    <rect class="node-edge" x="294" y="170" width="194" height="44" rx="8" />
-    <text class="label" x="308" y="190">Palo Alto + Los Angeles</text>
-    <text class="sub" x="308" y="206">West Coast pair</text>
-    <text class="sub" x="294" y="238">Europe and APAC pair the same way.</text>
+    <!-- site regions -->
+    <rect class="node" x="22" y="71" width="116" height="30" rx="6" />
+    <text class="label" x="34" y="91">Northeast</text>
+    <rect class="node" x="22" y="128" width="116" height="30" rx="6" />
+    <text class="label" x="34" y="148">Canada</text>
+    <rect class="node" x="22" y="185" width="116" height="30" rx="6" />
+    <text class="label" x="34" y="205">West Coast</text>
+    <rect class="node" x="22" y="242" width="116" height="30" rx="6" />
+    <text class="label" x="34" y="262">Europe</text>
+    <rect class="node" x="22" y="299" width="116" height="30" rx="6" />
+    <text class="label" x="34" y="319">APAC</text>
 
-    <!-- gap 2 -->
-    <text class="sub" x="551" y="120" text-anchor="middle">redundant</text>
-    <text class="sub" x="551" y="134" text-anchor="middle">IPsec + eBGP</text>
-    <path class="link" d="M500 152 L602 152" />
-    <path class="link" d="M508 146 L500 152 L508 158" />
-    <path class="link" d="M594 146 L602 152 L594 158" />
+    <!-- site region into its nearby secure access region -->
+    <text class="sub" x="189" y="76" text-anchor="middle">local entry</text>
+    <path class="link" d="M150 86 L236 86" /><path class="link" d="M228 80 L236 86 L228 92" />
+    <path class="link" d="M150 143 L236 143" /><path class="link" d="M228 137 L236 143 L228 149" />
+    <path class="link" d="M150 200 L236 200" /><path class="link" d="M228 194 L236 200 L228 206" />
+    <path class="link" d="M150 257 L236 257" /><path class="link" d="M228 251 L236 257 L228 263" />
+    <path class="link" d="M150 314 L236 314" /><path class="link" d="M228 308 L236 314 L228 320" />
 
-    <!-- RIGHT: data centers -->
-    <text class="panel-title" x="602" y="32">DATA CENTERS</text>
-    <rect class="panel" x="602" y="44" width="148" height="210" rx="12" />
-    <rect class="node" x="614" y="80" width="124" height="56" rx="8" />
-    <text class="label" x="628" y="104">Data Center A</text>
-    <text class="sub" x="628" y="121">internal prefixes</text>
-    <rect class="node" x="614" y="150" width="124" height="56" rx="8" />
-    <text class="label" x="628" y="174">Data Center B</text>
-    <text class="sub" x="628" y="191">internal prefixes</text>
-    <text class="sub" x="614" y="238">eBGP peers</text>
+    <!-- secure access regions -->
+    <rect class="node-edge" x="242" y="64" width="244" height="44" rx="8" />
+    <text class="label" x="256" y="84">New York + Ashburn</text>
+    <text class="sub" x="256" y="100">Northeast pair</text>
+    <rect class="node-edge" x="242" y="121" width="244" height="44" rx="8" />
+    <text class="label" x="256" y="141">Toronto + Vancouver</text>
+    <text class="sub" x="256" y="157">Canada pair</text>
+    <rect class="node-edge" x="242" y="178" width="244" height="44" rx="8" />
+    <text class="label" x="256" y="198">Palo Alto + Los Angeles</text>
+    <text class="sub" x="256" y="214">West Coast pair</text>
+    <rect class="node-edge" x="242" y="235" width="244" height="44" rx="8" />
+    <text class="label" x="256" y="255">Europe regions</text>
+    <text class="sub" x="256" y="271">regional pairs</text>
+    <rect class="node-edge" x="242" y="292" width="244" height="44" rx="8" />
+    <text class="label" x="256" y="312">APAC regions</text>
+    <text class="sub" x="256" y="328">regional pairs</text>
 
-    <!-- bottom: dynamic route exchange band -->
-    <line class="link-dim" x1="95" y1="254" x2="95" y2="292" />
-    <line class="link-dim" x1="391" y1="254" x2="391" y2="292" />
-    <line class="link-dim" x1="676" y1="254" x2="676" y2="292" />
-    <path class="link-active" d="M95 292 L676 292" />
-    <path class="link-active" d="M103 286 L95 292 L103 298" />
-    <path class="link-active" d="M668 286 L676 292 L668 298" />
-    <text class="tag" x="385" y="316" text-anchor="middle">dynamic route exchange — no static route matrix to maintain</text>
+    <!-- each region onto the backbone -->
+    <line class="link-active" x1="486" y1="86" x2="520" y2="86" />
+    <line class="link-active" x1="486" y1="143" x2="520" y2="143" />
+    <line class="link-active" x1="486" y1="200" x2="520" y2="200" />
+    <line class="link-active" x1="486" y1="257" x2="520" y2="257" />
+    <line class="link-active" x1="486" y1="314" x2="520" y2="314" />
+
+    <!-- the backbone itself -->
+    <path class="backbone" d="M520 86 L520 314" />
+    <circle class="junction" cx="520" cy="86" r="4" />
+    <circle class="junction" cx="520" cy="143" r="4" />
+    <circle class="junction" cx="520" cy="200" r="4" />
+    <circle class="junction" cx="520" cy="257" r="4" />
+    <circle class="junction" cx="520" cy="314" r="4" />
+
+    <!-- data centers terminate on the regions nearest them -->
+    <line class="link-active" x1="520" y1="86" x2="602" y2="86" />
+    <path class="link-active" d="M594 80 L602 86 L594 92" />
+    <text class="sub" x="561" y="78" text-anchor="middle">IPsec + eBGP</text>
+
+    <line class="link-active" x1="520" y1="200" x2="602" y2="200" />
+    <path class="link-active" d="M594 194 L602 200 L594 206" />
+    <text class="sub" x="561" y="192" text-anchor="middle">IPsec + eBGP</text>
+
+    <rect class="node" x="622" y="57" width="116" height="58" rx="8" />
+    <text class="label" x="636" y="81">East DC</text>
+    <text class="sub" x="636" y="98">internal prefixes</text>
+    <rect class="node" x="622" y="171" width="116" height="58" rx="8" />
+    <text class="label" x="636" y="195">West DC</text>
+    <text class="sub" x="636" y="212">internal prefixes</text>
+
+    <!-- legend -->
+    <path class="backbone" d="M16 370 L56 370" />
+    <text class="sub" x="66" y="374">Cisco Secure Access backbone between regions</text>
+    <line class="link-active" x1="16" y1="392" x2="56" y2="392" />
+    <text class="sub" x="66" y="396">dynamic route exchange over eBGP — no static route matrix</text>
   </svg>
 </Diagram>
+
+<style is:global>
+.diagram .backbone{ stroke:var(--signal); stroke-width:4; fill:none; stroke-linecap:round; }
+.diagram .junction{ fill:var(--signal); }
+</style>
