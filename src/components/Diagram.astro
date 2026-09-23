@@ -1,0 +1,42 @@
+---
+/**
+ * Wrapper for the inline-SVG diagrams used in posts: a bordered panel that
+ * scrolls horizontally on narrow screens, with a caption underneath.
+ * The SVG itself is passed as the default slot.
+ */
+interface Props {
+  caption?: string;
+}
+const { caption } = Astro.props;
+---
+<figure class="diagram">
+  <div class="diagram-frame">
+    <slot />
+  </div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style is:global>
+.diagram{ margin:2.4em 0; }
+.diagram-frame{
+  background:#15171b; border:1px solid var(--line); border-radius:14px;
+  padding:clamp(14px,2.5vw,26px); overflow-x:auto;
+}
+.diagram svg{ display:block; width:100%; min-width:520px; height:auto; font-family:var(--font-sans); }
+.diagram figcaption{ margin-top:12px; font-size:14px; line-height:1.5; color:var(--steel); }
+
+/* Shared diagram vocabulary */
+.diagram .node{ fill:var(--graphite-2); stroke:var(--line); stroke-width:1.5; }
+.diagram .node-edge{ fill:#1f2329; stroke:var(--steel); stroke-width:1.5; }
+.diagram .label{ fill:var(--text); font-size:14px; font-weight:600; }
+.diagram .sub{ fill:var(--steel); font-size:12px; }
+.diagram .link{ stroke:var(--steel); stroke-width:1.5; fill:none; }
+.diagram .link-dim{ stroke:var(--line); stroke-width:1.5; fill:none; }
+.diagram .link-active{ stroke:var(--signal); stroke-width:2.5; fill:none; }
+.diagram .link-standby{ stroke:var(--steel); stroke-width:1.5; fill:none; stroke-dasharray:5 5; }
+.diagram .link-ha{ stroke:var(--steel); stroke-width:1.5; fill:none; stroke-dasharray:3 4; }
+.diagram .tag{ fill:var(--signal); font-size:12px; font-weight:600; }
+.diagram .tag-dim{ fill:var(--steel); font-size:12px; font-weight:600; }
+.diagram .panel{ fill:none; stroke:var(--line); stroke-width:1; stroke-dasharray:4 4; }
+.diagram .panel-title{ fill:var(--steel); font-size:12px; font-weight:600; letter-spacing:.06em; }
+</style>

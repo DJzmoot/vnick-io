@@ -1,0 +1,53 @@
+---
+import Diagram from '../Diagram.astro';
+---
+<Diagram caption="Three transports, chosen per site rather than by reflex. The terrestrial circuits carry traffic together; cellular sits behind them as insurance and only earns its keep on the day everything else is gone.">
+  <svg viewBox="0 0 720 420" role="img" aria-labelledby="triWanTitle triWanDesc">
+    <title id="triWanTitle">Branch edge with three transports, including tertiary cellular</title>
+    <desc id="triWanDesc">
+      WAN 1 is a DIA circuit and WAN 2 is FTTX business broadband; both are active and
+      carry overlay tunnels. WAN 3 is a Meraki MG cellular gateway held as a tertiary,
+      last-resort path, drawn with a dashed line. All three feed the HA appliance pair,
+      which presents a single LAN-side virtual IP to the site core.
+    </desc>
+
+    <!-- transports -->
+    <rect class="node" x="26" y="14" width="200" height="56" rx="8" />
+    <text class="label" x="46" y="40">WAN 1 — DIA</text>
+    <text class="sub" x="46" y="58">active · SLA-backed</text>
+
+    <rect class="node" x="258" y="14" width="200" height="56" rx="8" />
+    <text class="label" x="278" y="40">WAN 2 — FTTX</text>
+    <text class="sub" x="278" y="58">active · business broadband</text>
+
+    <rect class="node" x="490" y="14" width="204" height="56" rx="8" />
+    <text class="label" x="510" y="40">WAN 3 — Meraki MG</text>
+    <text class="sub" x="510" y="58">tertiary · pooled cellular</text>
+
+    <!-- into the edge -->
+    <path class="link" d="M126 70 L126 118 L250 118 L250 160" />
+    <path class="link" d="M358 70 L358 160" />
+    <path class="link-standby" d="M592 70 L592 118 L470 118 L470 160" />
+    <text class="tag-dim" x="604" y="106">last resort</text>
+
+    <!-- edge -->
+    <rect class="node-edge" x="150" y="160" width="420" height="72" rx="10" />
+    <text class="label" x="176" y="190">Meraki MX HA pair</text>
+    <text class="sub" x="176" y="210">active / active across terrestrial · cellular held passive</text>
+
+    <!-- overlay note -->
+    <line class="link-active" x1="570" y1="196" x2="586" y2="196" />
+    <text class="tag" x="592" y="193">encrypted</text>
+    <text class="tag" x="592" y="208">overlay</text>
+
+    <!-- lan -->
+    <line class="link-active" x1="360" y1="232" x2="360" y2="290" />
+    <rect class="node" x="150" y="290" width="420" height="48" rx="8" />
+    <text class="label" x="176" y="320">LAN-side VRRP VIP</text>
+    <text class="tag" x="444" y="320">x.x.x.254</text>
+
+    <line class="link-active" x1="360" y1="338" x2="360" y2="362" />
+    <rect class="node" x="250" y="362" width="220" height="40" rx="8" />
+    <text class="label" x="276" y="387">Site core</text>
+  </svg>
+</Diagram>

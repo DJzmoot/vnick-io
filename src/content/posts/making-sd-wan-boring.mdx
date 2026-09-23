@@ -1,0 +1,318 @@
+---
+title: "Making SD-WAN boring"
+description: "What actually made several large-scale Cisco Meraki SD-WAN migrations work: auditing the carrier underlay, designing coexistence with the legacy WAN, prestaging the edge, and reducing each cutover to a single routing change."
+date: 2026-09-22
+topic: network
+draft: false
+---
+
+import BranchHa from '../../components/diagrams/BranchHa.astro';
+import TriWan from '../../components/diagrams/TriWan.astro';
+import Coexistence from '../../components/diagrams/Coexistence.astro';
+import HybridTransition from '../../components/diagrams/HybridTransition.astro';
+
+I've designed and implemented several large Cisco Meraki SD-WAN deployments
+now, across estates big enough that no single person could have touched every
+site. The honest summary of all of them is that the interesting part was not
+Meraki.
+
+The overlay is genuinely good, and I'd choose it again. But if I had to
+explain why those migrations went smoothly, almost none of the reasons would
+be features. They'd be things like knowing which of our "redundant" circuits
+actually shared a conduit, or having the new edge sitting on the LAN
+answering pings for two weeks before it carried a packet of production
+traffic. The goal was to make a WAN migration across dozens of sites feel
+repetitive, and mostly we got there.
+
+What follows is the pattern that kept showing up.
+
+## Fix the underlay first
+
+Before we deployed anything, we audited the ISP connectivity at every site.
+Not a spreadsheet of "site, carrier, speed" — an actual audit. Carrier,
+bandwidth, circuit type, who owns the contract, renewal date, monthly cost,
+public IP allocation, handoff type, and then the question that matters most:
+are the two circuits at this site genuinely independent?
+
+That last one has a specific failure mode. A site has two carriers, two
+invoices, two demarcs, and a diagram with two lines on it — and both circuits
+ride the same last mile, or land in the same carrier POP, or one carrier is
+quietly reselling the other's access. Having two ISP invoices does not
+necessarily mean you have two independent WAN paths. You find this out either
+by asking hard questions during an audit or by watching both circuits drop
+at the same moment on a Tuesday afternoon.
+
+For several deployments we worked through ISP brokers — Global Gig among them
+— to centralize carrier management. They handled sourcing, diversity
+analysis, rate negotiation, contract consolidation, permits, install
+scheduling, IP block approvals, the endless carrier follow-up, project
+management, testing and final handoff. That is a real category of work, and
+it is not work my engineers should be doing.
+
+Sometimes the audit ended with adding a second ISP. Sometimes it ended with
+replacing the primary too, because the incumbent circuit was the weakest
+thing at the site. Either way the point is the same: SD-WAN cannot
+manufacture resilience out of two bad circuits. It can steer around a brownout
+beautifully, but only if there is somewhere to steer to.
+
+## The bill was the easy win
+
+We were overpaying for a lot of circuits. Looking at you, AT&T.
+
+The pattern was consistent enough to be funny. In many cases we could buy a
+brand-new circuit from the *same carrier*, at a higher speed tier, for a
+lower monthly rate than the legacy circuit we were replacing. That sounds
+absurd until you remember how enterprise telecom pricing works: a contract
+signed years ago and quietly auto-renewed since is priced against a market
+that no longer exists. Nobody at the carrier is going to call and offer you
+the better deal.
+
+So the migrations often landed on more bandwidth, better diversity, lower
+monthly cost and fewer vendors to chase, all at once. The bandwidth increase
+alone changed what was possible at some sites.
+
+For some deployments the broker also provided monitored and managed ISP
+services, which meant they owned the carrier-facing operational work after
+deployment. Our NMS detected the circuit failure; they opened the ticket, sat
+on hold, worked through the ISP's script, chased updates, coordinated with
+the last-mile provider and escalated the POP or local-loop problems. If the
+NMS sees a circuit go down — hello, Stratora — I don't necessarily need one
+of my engineers spending an hour proving to a carrier that their own circuit
+is down.
+
+That division of labor makes more sense the moment you look at where these
+failures actually live. It's rarely inside the building. It's the last mile,
+the carrier POP, a fiber cut two towns over, an access-layer provider fault,
+carrier CPE, or something upstream that nobody will describe to you
+precisely. Our job is to survive it; the carrier's job is to fix it.
+
+## Not every branch needs two DIA circuits
+
+Moving away from MPLS saved real money in most cases and usually came with a
+substantial bandwidth increase. That isn't a knock on MPLS — it did something
+genuinely useful for a long time, offering predictable private connectivity
+with behavior you could plan around. But encrypted overlays and local
+Internet breakout changed the economics underneath it, and paying private-
+circuit prices to backhaul a branch's cloud traffic through a data center
+stopped making sense.
+
+What replaced it was usually simpler than what people expect. A very
+practical branch design looked like this: WAN 1 a DIA circuit, WAN 2 FTTX or
+business broadband, WAN 3 cellular. Three independent transports, an
+encrypted corporate overlay across them, and local breakout for the traffic
+that has no business crossing the country first.
+
+In practice that often delivered better resiliency than the legacy WAN while
+costing less, because the failure domains were genuinely different rather
+than nominally different. DIA still earns its place where SLAs, symmetry or
+specific critical services justify it, and we kept it where that was true.
+The point was never that broadband beats DIA. The point is to pick transports
+that suit the site instead of reflexively buying two expensive DIA circuits
+everywhere because that's what the template said.
+
+## Cellular as insurance, not as a circuit
+
+In the newer deployments we used Meraki MG cellular gateways, and the
+difference from some of our older cellular designs was mostly operational.
+We've built tertiary cellular with CradlePoint, carrier-supplied modems and
+assorted third-party LTE and 5G devices, and all of it worked. What the MG
+changed was that cellular stopped being its own little island with its own
+portal, its own firmware story and its own troubleshooting ritual.
+
+It showed up in the same dashboard as everything else: same inventory, same
+configuration model, same visibility, same remote deployment story, same
+place to look when something is wrong. Across dozens of sites, that
+consistency is worth more than any individual feature. Less vendor sprawl
+means fewer things a tired engineer has to remember at 2 a.m.
+
+<TriWan />
+
+The other half of making tertiary cellular viable is the data plan, and this
+is the part I'd tell anyone to ask about explicitly: ask your broker or
+carrier about pooled data across the estate. Most of those cellular circuits
+will do nothing all year. Paying for a large standalone plan at every branch
+to cover an outage that may never come is how tertiary connectivity gets cut
+from the budget. A pooled allocation shared across many sites prices it like
+what it actually is — an insurance layer for full terrestrial outages, fiber
+cuts, maintenance windows, local carrier failures and facility incidents.
+
+Designed that way, cellular at a lot of critical sites is surprisingly
+affordable. Designed as a primary circuit at every site, it isn't.
+
+## Build the edge so the redundancy survives
+
+At most sites we used Meraki appliances in HA pairs, and we physically
+separated the WAN handoffs. WAN 1 to DMZ switch 1, WAN 2 to DMZ switch 2,
+WAN 3 or cellular to a third where one was present — with both appliances
+able to reach every available uplink.
+
+<BranchHa />
+
+This is the part that gets skipped when a project is behind schedule, and
+it's the part I care about most. It is entirely possible to buy two diverse
+circuits, pay for them every month, then land them both on the same switch
+and spend the next three years believing you have redundancy. The hardware
+specifics varied across deployments, but the pattern didn't: no single
+switch, port group or appliance should be able to take down more paths than
+it has any right to.
+
+With the terrestrial circuits up, tunnels ran active/active across them.
+Where tertiary cellular was present, the behavior was effectively
+active/active/passive — cellular staying out of the way until it was the only
+thing left, exactly as intended.
+
+## Prestage everything
+
+A lot of branch and ROBO sites had no local IT, so we prestaged everything
+in-house. We claimed and configured the devices, labeled the hardware and the
+ports, prebuilt the configurations, generated a connection diagram specific
+to that site, included color-coded CAT6 patch cables, packed it all logically
+and shipped it out.
+
+The target was that the box arriving at the site contained a mostly assembled
+answer rather than a network engineering project. Whoever opened it —
+sometimes an office manager, sometimes a general contractor's electrician —
+should be plugging colored cable into matching colored labels, not
+interpreting anything.
+
+Where a site did have competent local IT, we used a different trick: connect
+the new appliances behind the existing network, temporarily double-NATted,
+and let them reach the cloud and pull their configuration days before the
+cutover. That gave us cloud registration, configuration state, uplink status,
+firmware and basic tunnel readiness all confirmed while production routing
+sat untouched. Most of the things that go wrong on cutover night are things
+that could have been discovered a week earlier, for free.
+
+## One address, at every site
+
+This is almost too simple to write down, and it made everything easier.
+
+The existing WAN routers already had LAN-side addresses at each site, so we
+standardized where the new edge would live in that space:
+
+```
+x.x.x.1     core gateway VIP
+x.x.x.2     core switch 1
+x.x.x.3     core switch 2
+x.x.x.4-5   legacy WAN router(s)
+x.x.x.254   Meraki HA VRRP VIP
+```
+
+We used `.254` where it was free, because it usually was. The specific number
+doesn't matter at all. The consistency does: an engineer working any site in
+the estate knows where the SD-WAN edge lives without opening documentation,
+and every runbook, diagram and rollback note says the same thing.
+
+More importantly, this let the legacy WAN and the new SD-WAN coexist on the
+same LAN. Both were cabled, both were live, and we could validate Internet
+access, tunnel establishment, failover behavior, routing and application
+reachability from the new path while production kept running on the old one.
+
+## The cutover is a routing change
+
+At a typical branch, the migration itself should sound anticlimactic, because
+it was. The core already had a default route pointing at the legacy WAN next
+hop. At cutover, that became the Meraki VRRP VIP.
+
+<Coexistence />
+
+That was the meaningful change. No endpoint readdressing, no gateway
+migration, no rebuilding core VLANs, no pulling the old routers out of the
+rack before anything was proven. The legacy WAN stayed connected and stayed
+capable. If validation went badly enough, rollback was changing the default
+route back.
+
+I like migrations where rollback can be explained in one sentence. It changes
+the conversation with the business, it changes how willing people are to
+schedule the window, and it changes how calm the room is at 9 p.m.
+
+## Standardize, but don't pretend every site is the same
+
+Branches and data centers didn't get the same routing design, and they
+shouldn't have. A simple branch has a handful of VLANs that change maybe
+twice a decade, so static routes on the Meraki side pointed at the core LAN
+VIP were exactly enough — fewer moving parts, nothing to converge, nothing to
+misconfigure. Larger facilities and data centers, where subnets and VLANs
+change often enough to make static routing a maintenance liability, got OSPF
+between the core and the WAN edge.
+
+Overlay topology followed the same logic. For large environments with many
+ROBOs, geographic hubs made sense: concentrate the tunnels, concentrate the
+services behind them, keep the fabric comprehensible. For some international
+environments with fewer than roughly fifty locations, fuller mesh designs
+were the better fit — particularly where staff and management routinely
+traveled between facilities and worked out of whichever office they were in
+that week. When people genuinely move between sites, direct site-to-site
+reachability stops being an architectural nicety.
+
+Neither answer is universally right. The architecture should follow how the
+organization actually communicates, which is a question you answer by looking
+at traffic and asking people, not by picking the topology you like.
+
+A ten-person sales office and a data center do not need identical routing
+designs just because they both happen to run Meraki.
+
+## Designing the in-between
+
+Large migrations don't happen at once, so for a long stretch all of it
+coexists: SD-WAN, MPLS, legacy IPsec tunnels, old static routes and whatever
+site-specific dependency somebody built in 2016. That transitional state is
+not an accident to be endured. It's a thing you design.
+
+For the hybrid MPLS and IPsec period, selected hub and data-center locations
+advertised or redistributed reachability between the legacy WAN and the
+SD-WAN fabric. The East data center acted as the next hop and redistribution
+point for the remaining East Coast MPLS sites; the West data center did the
+same for western locations.
+
+<HybridTransition />
+
+That let migrated sites keep reaching not-yet-migrated ones for as long as
+the rollout took, which in practice meant nobody outside the project team
+needed to know or care what order the sites were done in. As each site cut
+over, the legacy domain got a little smaller, until eventually the
+redistribution had nothing left to redistribute and could come out.
+
+Designing the temporary state properly is just as important as designing the
+final one. You will live in the temporary state far longer.
+
+## Test the rollback, not just the rollout
+
+Pilot with small sites first. Then pilot with the awkward ones — the site
+with the ancient application nobody owns, the site with the strange voice
+setup, the site where the local Internet is genuinely bad. Then scale.
+
+At each stage we validated the same list: ISP failover, appliance failover,
+tunnel failover, routing, Internet access, internal application reachability,
+voice, DNS, whatever site-specific services existed, cellular failover where
+present, and rollback. Pulling cables to watch what actually happens is worth
+more than any amount of confidence about what should happen.
+
+That last item deserves its own sentence. A rollback plan that has never been
+exercised is mostly a theory. We tested reverting the default route as
+deliberately as we tested the cutover, because the entire premise of the
+low-drama migration is that the escape hatch works.
+
+By the time we were dozens of sites in, the process felt repetitive. Same
+prestage, same shipment, same validation, same one-line change. That's not
+boredom; that's the product. Repetitive means predictable, and predictable is
+what lets you schedule forty cutovers without forty separate arguments.
+
+## What actually made it work
+
+None of the individual pieces here are exotic. Cleaning up the carrier
+underlay and insisting on real path diversity. Taking the cost savings that
+were sitting there. Prestaging hardware so site visits were assembly rather
+than engineering. Standardized addressing. Coexistence on the LAN. Routing
+designs that suited the site instead of the template. Hub topology that
+matched how the company actually works. Transitional routing that was
+deliberately designed. Cellular treated as estate-wide insurance. Extensive
+testing, including of the rollback.
+
+Meraki made the overlay straightforward, and that matters — it's why the
+fabric was the least eventful part of the project. But the reason these
+deployments went well is that the architecture around it kept the number of
+things changing at any one moment very small.
+
+By the time we changed the default route, most of the project was already
+over.

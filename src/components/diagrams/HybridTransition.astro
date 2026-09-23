@@ -1,0 +1,57 @@
+---
+import Diagram from '../Diagram.astro';
+---
+<Diagram caption="The transitional state, which is a design in its own right. While the rollout runs, the data centers bridge the shrinking legacy WAN and the growing SD-WAN fabric so every site can still reach every other site.">
+  <svg viewBox="0 0 720 360" role="img" aria-labelledby="hybridTitle hybridDesc">
+    <title id="hybridTitle">Hybrid MPLS and SD-WAN transition topology</title>
+    <desc id="hybridDesc">
+      Remaining legacy MPLS sites on each coast connect to their regional data center.
+      The East and West data centers are part of the SD-WAN fabric and redistribute
+      reachability between the legacy WAN and the overlay, so migrated sites and
+      not-yet-migrated sites can still reach each other during the rollout.
+    </desc>
+
+    <!-- legacy clusters -->
+    <rect class="node" x="18" y="128" width="150" height="64" rx="8" />
+    <text class="label" x="38" y="154">Legacy MPLS</text>
+    <text class="sub" x="38" y="172">East sites · shrinking</text>
+
+    <rect class="node" x="552" y="128" width="150" height="64" rx="8" />
+    <text class="label" x="572" y="154">Legacy MPLS</text>
+    <text class="sub" x="572" y="172">West sites · shrinking</text>
+
+    <line class="link-dim" x1="168" y1="160" x2="214" y2="160" />
+    <text class="tag-dim" x="172" y="150">MPLS</text>
+    <line class="link-dim" x1="506" y1="160" x2="552" y2="160" />
+    <text class="tag-dim" x="510" y="150">MPLS</text>
+
+    <!-- data centers -->
+    <rect class="node-edge" x="214" y="124" width="132" height="72" rx="8" />
+    <text class="label" x="234" y="152">East DC</text>
+    <text class="sub" x="234" y="170">hub · redistribution</text>
+
+    <rect class="node-edge" x="374" y="124" width="132" height="72" rx="8" />
+    <text class="label" x="394" y="152">West DC</text>
+    <text class="sub" x="394" y="170">hub · redistribution</text>
+
+    <!-- fabric between hubs -->
+    <line class="link-active" x1="346" y1="160" x2="374" y2="160" />
+
+    <!-- migrated sites on the overlay -->
+    <rect class="node" x="214" y="40" width="292" height="46" rx="8" />
+    <text class="label" x="238" y="69">Migrated SD-WAN sites</text>
+    <text class="tag" x="430" y="69">growing</text>
+
+    <path class="link-active" d="M280 124 L280 86" />
+    <path class="link-active" d="M440 124 L440 86" />
+
+    <!-- fabric label band -->
+    <rect class="panel" x="200" y="24" width="320" height="188" rx="12" />
+    <text class="panel-title" x="222" y="232">SD-WAN FABRIC</text>
+
+    <!-- transitional note -->
+    <text class="sub" x="222" y="278">Each migrated site leaves the legacy domain and joins the overlay.</text>
+    <text class="sub" x="222" y="298">The hubs keep both worlds reachable until the last MPLS site is gone —</text>
+    <text class="sub" x="222" y="318">at which point this drawing gets much simpler.</text>
+  </svg>
+</Diagram>

@@ -1,0 +1,61 @@
+---
+import Diagram from '../Diagram.astro';
+---
+<Diagram caption="Dual-WAN branch edge. Each circuit lands on its own DMZ switch, and both appliances can reach both uplinks, so a redundant pair of circuits never collapses back into one shared failure point.">
+  <svg viewBox="0 0 720 470" role="img" aria-labelledby="branchHaTitle branchHaDesc">
+    <title id="branchHaTitle">Dual-WAN high-availability branch edge</title>
+    <desc id="branchHaDesc">
+      ISP 1 (DIA) connects to DMZ switch 1 and ISP 2 (FTTX) connects to DMZ switch 2.
+      Each DMZ switch connects to both appliances of a Meraki HA pair. The pair shares
+      a LAN-side VRRP virtual IP, which connects down to the site core.
+    </desc>
+
+    <!-- circuits -->
+    <rect class="node" x="40" y="14" width="250" height="50" rx="8" />
+    <text class="label" x="62" y="38">ISP 1</text>
+    <text class="sub" x="62" y="55">DIA · primary</text>
+
+    <rect class="node" x="430" y="14" width="250" height="50" rx="8" />
+    <text class="label" x="452" y="38">ISP 2</text>
+    <text class="sub" x="452" y="55">FTTX · secondary</text>
+
+    <line class="link" x1="165" y1="64" x2="165" y2="100" />
+    <line class="link" x1="555" y1="64" x2="555" y2="100" />
+
+    <!-- dmz switches -->
+    <rect class="node" x="40" y="100" width="250" height="46" rx="8" />
+    <text class="label" x="62" y="129">DMZ switch 1</text>
+
+    <rect class="node" x="430" y="100" width="250" height="46" rx="8" />
+    <text class="label" x="452" y="129">DMZ switch 2</text>
+
+    <!-- each switch reaches both appliances -->
+    <path class="link" d="M140 146 L140 218 L172 218 L172 250" />
+    <path class="link" d="M580 146 L580 218 L548 218 L548 250" />
+    <path class="link" d="M240 146 L240 200 L468 200 L468 250" />
+    <path class="link" d="M480 146 L480 176 L252 176 L252 250" />
+
+    <!-- appliance pair -->
+    <rect class="node-edge" x="120" y="250" width="180" height="58" rx="8" />
+    <text class="label" x="142" y="277">Meraki MX — A</text>
+    <text class="sub" x="142" y="295">active</text>
+
+    <rect class="node-edge" x="420" y="250" width="180" height="58" rx="8" />
+    <text class="label" x="442" y="277">Meraki MX — B</text>
+    <text class="sub" x="442" y="295">standby</text>
+
+    <line class="link-ha" x1="300" y1="279" x2="420" y2="279" />
+    <text class="tag-dim" x="331" y="271">HA pair</text>
+
+    <!-- lan side -->
+    <line class="link-active" x1="210" y1="308" x2="210" y2="348" />
+    <line class="link-active" x1="510" y1="308" x2="510" y2="348" />
+    <rect class="node" x="120" y="348" width="480" height="48" rx="8" />
+    <text class="label" x="146" y="378">LAN-side VRRP VIP</text>
+    <text class="tag" x="474" y="378">x.x.x.254</text>
+
+    <line class="link-active" x1="360" y1="396" x2="360" y2="420" />
+    <rect class="node" x="250" y="420" width="220" height="40" rx="8" />
+    <text class="label" x="276" y="445">Site core</text>
+  </svg>
+</Diagram>

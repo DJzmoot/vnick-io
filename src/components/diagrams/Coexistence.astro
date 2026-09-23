@@ -1,0 +1,64 @@
+---
+import Diagram from '../Diagram.astro';
+---
+<Diagram caption="The whole cutover. Both WANs stay physically connected on the same LAN; the only thing that changes is where the core points its default route — which is also the whole rollback.">
+  <svg viewBox="0 0 720 340" role="img" aria-labelledby="coexTitle coexDesc">
+    <title id="coexTitle">Legacy WAN and SD-WAN coexistence, before and after cutover</title>
+    <desc id="coexDesc">
+      Before cutover, the site core points its default route at the legacy WAN router and
+      the Meraki HA pair sits connected but unused. After cutover, the default route points
+      at the Meraki virtual IP and the legacy router stays connected but idle. Nothing else
+      about the site changes.
+    </desc>
+
+    <!-- BEFORE -->
+    <rect class="panel" x="16" y="14" width="320" height="310" rx="12" />
+    <text class="panel-title" x="36" y="40">BEFORE CUTOVER</text>
+
+    <rect class="node" x="106" y="58" width="140" height="42" rx="8" />
+    <text class="label" x="146" y="85">Site core</text>
+
+    <path class="link-active" d="M140 100 L140 150 L106 150 L106 186" />
+    <text class="tag" x="36" y="136">0.0.0.0/0</text>
+
+    <path class="link-dim" d="M212 100 L212 150 L250 150 L250 186" />
+
+    <rect class="node" x="36" y="186" width="140" height="58" rx="8" />
+    <text class="label" x="56" y="212">Legacy WAN</text>
+    <text class="sub" x="56" y="230">x.x.x.4 · in use</text>
+
+    <rect class="node" x="182" y="186" width="140" height="58" rx="8" />
+    <text class="label" x="202" y="212">Meraki VIP</text>
+    <text class="sub" x="202" y="230">x.x.x.254 · idle</text>
+
+    <text class="sub" x="36" y="280">Validate the new path while</text>
+    <text class="sub" x="36" y="298">production still rides the old one.</text>
+
+    <!-- arrow between panels -->
+    <path class="link-active" d="M348 170 L376 170" />
+    <path class="link-active" d="M368 163 L376 170 L368 177" />
+
+    <!-- AFTER -->
+    <rect class="panel" x="388" y="14" width="316" height="310" rx="12" />
+    <text class="panel-title" x="408" y="40">AFTER CUTOVER</text>
+
+    <rect class="node" x="476" y="58" width="140" height="42" rx="8" />
+    <text class="label" x="516" y="85">Site core</text>
+
+    <path class="link-dim" d="M510 100 L510 150 L476 150 L476 186" />
+
+    <path class="link-active" d="M582 100 L582 150 L620 150 L620 186" />
+    <text class="tag" x="612" y="136">0.0.0.0/0</text>
+
+    <rect class="node" x="406" y="186" width="140" height="58" rx="8" />
+    <text class="label" x="426" y="212">Legacy WAN</text>
+    <text class="sub" x="426" y="230">x.x.x.4 · still cabled</text>
+
+    <rect class="node-edge" x="552" y="186" width="140" height="58" rx="8" />
+    <text class="label" x="572" y="212">Meraki VIP</text>
+    <text class="sub" x="572" y="230">x.x.x.254 · in use</text>
+
+    <text class="sub" x="408" y="280">Rollback is the same change,</text>
+    <text class="sub" x="408" y="298">pointed back the other way.</text>
+  </svg>
+</Diagram>
