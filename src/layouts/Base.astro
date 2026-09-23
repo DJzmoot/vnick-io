@@ -6,9 +6,17 @@ import logoMark from '../assets/brand/logo-mark.png';
 interface Props {
   title: string;
   description: string;
+  /** "article" on post pages so shares and crawlers treat them as writing. */
+  ogType?: 'website' | 'article';
+  /** ISO date, articles only. */
+  publishedTime?: string;
+  /** Topic name, articles only. */
+  section?: string;
+  /** Keep a page out of the index (used by 404). */
+  noindex?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, ogType = 'website', publishedTime, section, noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/og-image.png', Astro.site);
 const path = Astro.url.pathname;
@@ -23,18 +31,26 @@ const current = (prefix: string) =>
 <title>{title}</title>
 <meta name="description" content={description} />
 <meta name="author" content="Nick Manganiello" />
+<meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
 <link rel="canonical" href={canonical} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical} />
-<meta property="og:type" content="website" />
+<meta property="og:type" content={ogType} />
+<meta property="og:locale" content="en_US" />
 <meta property="og:site_name" content="vNick.io" />
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="vNick.io — design, build, control" />
+{ogType === 'article' && publishedTime && <meta property="article:published_time" content={publishedTime} />}
+{ogType === 'article' && <meta property="article:author" content="Nick Manganiello" />}
+{ogType === 'article' && section && <meta property="article:section" content={section} />}
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content="vNick.io — design, build, control" />
 <link rel="icon" href="/favicon.ico" sizes="32x32" />
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />

@@ -1,14 +1,46 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { getPosts, TOPICS, formatDate, isoDate } from '../../lib/posts';
+import { person, website, graph, breadcrumb, PERSON_ID, SITE_ID, SITE_URL } from '../../lib/seo';
 
 const posts = await getPosts();
 const topics = Object.entries(TOPICS) as [keyof typeof TOPICS, string][];
+
+const jsonLd = graph(
+  person,
+  website,
+  {
+    '@type': 'Blog',
+    '@id': `${SITE_URL}/writing/#blog`,
+    url: `${SITE_URL}/writing/`,
+    name: 'Writing — vNick.io',
+    description:
+      'Writing by Nick Manganiello on network infrastructure, virtualization, BCDR, cloud and endpoint management, and lighting design.',
+    isPartOf: { '@id': SITE_ID },
+    author: { '@id': PERSON_ID },
+    publisher: { '@id': PERSON_ID },
+    inLanguage: 'en-US',
+    blogPost: posts.map((p) => ({
+      '@type': 'BlogPosting',
+      '@id': `${SITE_URL}/writing/${p.id}/#article`,
+      headline: p.data.title,
+      url: `${SITE_URL}/writing/${p.id}/`,
+      datePublished: isoDate(p.data.date),
+      articleSection: TOPICS[p.data.topic],
+      author: { '@id': PERSON_ID },
+    })),
+  },
+  breadcrumb([
+    { name: 'Home', url: `${SITE_URL}/` },
+    { name: 'Writing', url: `${SITE_URL}/writing/` },
+  ]),
+);
 ---
 <Base
   title="Writing — vNick.io"
   description="Writing by Nick Manganiello: network infrastructure, virtualization, BCDR, cloud and MDM, and lighting design and programming."
 >
+  <script type="application/ld+json" slot="head" set:html={jsonLd} />
   <main>
     <section class="page wrap">
       <h1 class="page-title">Writing</h1>

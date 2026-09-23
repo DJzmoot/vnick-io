@@ -1,32 +1,43 @@
 ---
 import Base from '../layouts/Base.astro';
+import { person, website, graph, breadcrumb, PERSON_ID, SITE_ID, SITE_URL } from '../lib/seo';
 
-const personLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: 'Nick Manganiello',
-  alternateName: 'vNick',
-  url: 'https://vnick.io/about/',
-  email: 'nick@vnick.io',
-  jobTitle: 'Principal Infrastructure Architect',
-  description:
-    'Infrastructure architect and systems builder: data centers, networks, virtualization, BCDR, cloud, live production and lighting.',
-  homeLocation: { '@type': 'Place', name: 'Long Island, New York' },
-  sameAs: ['https://stratora.io', 'https://djneventproductions.com/', 'https://github.com/DJzmoot'],
-};
+const jsonLd = graph(
+  person,
+  website,
+  {
+    '@type': 'ProfilePage',
+    '@id': `${SITE_URL}/about/#webpage`,
+    url: `${SITE_URL}/about/`,
+    name: 'About Nick Manganiello',
+    description:
+      'How Nick Manganiello got here: early computers and DJing, DJN Event Productions and IT consulting at fourteen, then enterprise infrastructure architecture, theatrical production, facilities work and Stratora.',
+    isPartOf: { '@id': SITE_ID },
+    mainEntity: { '@id': PERSON_ID },
+    about: { '@id': PERSON_ID },
+    inLanguage: 'en-US',
+  },
+  breadcrumb([
+    { name: 'Home', url: `${SITE_URL}/` },
+    { name: 'About', url: `${SITE_URL}/about/` },
+  ]),
+);
 ---
 <Base
   title="About Nick Manganiello — vNick.io"
-  description="How I got here: computers on Windows 95 at five, DJing at eight, DJN Event Productions and independent IT consulting at fourteen, then enterprise infrastructure, theatrical production, facilities work, and Stratora."
+  description="Nick Manganiello (Nicolas Manganiello) is an infrastructure architect on Long Island, New York. How I got here: computers at five, DJing at eight, DJN Event Productions and IT consulting at fourteen, then enterprise infrastructure, theatrical production, facilities work, and Stratora."
 >
-  <script type="application/ld+json" slot="head" set:html={JSON.stringify(personLd)} />
+  <script type="application/ld+json" slot="head" set:html={jsonLd} />
 
   <main>
     <article class="page wrap">
       <h1 class="page-title">How I got here</h1>
       <p class="termline">nick@vnick.io:~$ whoami</p>
       <div class="prose">
-        <p>I'm Nick Manganiello. I've spent most of my life building systems.</p>
+        <p>
+          I'm Nick Manganiello — Nicolas Manganiello on anything official, Nick
+          everywhere else. I've spent most of my life building systems.
+        </p>
         <p>
           I started experimenting with computers on Windows 95 around age five,
           built my first PC from spare parts at seven — it ran Windows 98 SE —

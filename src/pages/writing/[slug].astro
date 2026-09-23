@@ -2,6 +2,7 @@
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { getPosts, TOPICS, formatDate, isoDate, type Post } from '../../lib/posts';
+import { person, website, graph, breadcrumb, PERSON_ID, SITE_ID, SITE_URL, FULL_NAME } from '../../lib/seo';
 
 export async function getStaticPaths() {
   const posts = await getPosts();
@@ -11,18 +12,58 @@ export async function getStaticPaths() {
 interface Props { post: Post }
 const { post } = Astro.props;
 const { Content } = await render(post);
+
+const url = `${SITE_URL}/writing/${post.id}/`;
+const published = isoDate(post.data.date);
+
+const jsonLd = graph(
+  person,
+  website,
+  {
+    '@type': 'BlogPosting',
+    '@id': `${url}#article`,
+    headline: post.data.title,
+    name: post.data.title,
+    description: post.data.description,
+    url,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    datePublished: published,
+    dateModified: published,
+    inLanguage: 'en-US',
+    articleSection: TOPICS[post.data.topic],
+    image: `${SITE_URL}/og-image.png`,
+    author: { '@id': PERSON_ID },
+    creator: { '@id': PERSON_ID },
+    publisher: { '@id': PERSON_ID },
+    isPartOf: { '@id': SITE_ID },
+  },
+  breadcrumb([
+    { name: 'Home', url: `${SITE_URL}/` },
+    { name: 'Writing', url: `${SITE_URL}/writing/` },
+    { name: post.data.title, url },
+  ]),
+);
 ---
-<Base title={`${post.data.title} — vNick.io`} description={post.data.description}>
+<Base
+  title={`${post.data.title} — vNick.io`}
+  description={post.data.description}
+  ogType="article"
+  publishedTime={published}
+  section={TOPICS[post.data.topic]}
+>
+  <script type="application/ld+json" slot="head" set:html={jsonLd} />
+
   <main>
     <article class="page wrap">
       <header class="post-head">
         <p class="meta">
           <a class="topic" href={`/writing?topic=${post.data.topic}`}>{TOPICS[post.data.topic]}</a>
-          <time datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time>
+          <time datetime={published}>{formatDate(post.data.date)}</time>
           {post.data.draft && <span class="draft-badge">Draft</span>}
         </p>
         <h1>{post.data.title}</h1>
         <p class="desc">{post.data.description}</p>
+        <p class="byline">by <a rel="author" href="/about">{FULL_NAME}</a></p>
       </header>
 
       <div class="prose">

@@ -1,0 +1,7 @@
+# vNick.io — Nick Manganiello
+# Everything here is meant to be found.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://vnick.io/sitemap-index.xml

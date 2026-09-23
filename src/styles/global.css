@@ -140,6 +140,9 @@ footer{ position:relative; z-index:1; border-top:1px solid var(--line); display:
 .post-head .meta time{ color:var(--steel); }
 .post-head h1{ font-weight:800; letter-spacing:-.035em; font-size:clamp(40px,5.6vw,92px); line-height:.95; margin:0 0 24px; }
 .post-head .desc{ font-size:clamp(17px,1.35vw,20px); line-height:1.55; color:#c3c8d0; max-width:52ch; margin:0; }
+.post-head .byline{ margin:20px 0 0; font-size:15px; color:var(--steel); }
+.post-head .byline a{ color:var(--text); text-decoration:none; border-bottom:1px solid var(--line); padding-bottom:2px; }
+.post-head .byline a:hover{ border-color:var(--signal); }
 
 /* Long-form typography */
 .prose{ max-width:72ch; font-size:clamp(17px,1.25vw,19px); line-height:1.7; color:#d4d8de; }

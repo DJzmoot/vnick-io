@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import { person, website, graph, breadcrumb, PERSON_ID, SITE_ID, SITE_URL } from '../lib/seo';
 
 const projects = [
   {
@@ -33,11 +34,42 @@ const projects = [
     desc: 'Design and integration under DJN for restaurants, bars, clubs and catering halls: sound reinforcement, architectural lighting, control systems and networking.',
   },
 ];
+
+const jsonLd = graph(
+  person,
+  website,
+  {
+    '@type': 'CollectionPage',
+    '@id': `${SITE_URL}/projects/#webpage`,
+    url: `${SITE_URL}/projects/`,
+    name: 'Projects — Nick Manganiello',
+    description:
+      'Selected infrastructure builds by Nick Manganiello: offshore production networks, multi-region cloud DR, large VMware migrations, server-room design, and permanent venue AV and lighting installations.',
+    isPartOf: { '@id': SITE_ID },
+    about: { '@id': PERSON_ID },
+    inLanguage: 'en-US',
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: projects.map((p, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: p.title,
+        description: p.desc,
+      })),
+    },
+  },
+  breadcrumb([
+    { name: 'Home', url: `${SITE_URL}/` },
+    { name: 'Projects', url: `${SITE_URL}/projects/` },
+  ]),
+);
 ---
 <Base
   title="Projects — vNick.io"
   description="Selected builds by Nick Manganiello: offshore production networks, multi-region cloud DR, large VMware migrations, server-room design, and permanent venue AV and lighting installations."
 >
+  <script type="application/ld+json" slot="head" set:html={jsonLd} />
+
   <main>
     <section class="page wrap">
       <h1 class="page-title">Projects</h1>

@@ -3,36 +3,28 @@ import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import logoFull from '../assets/brand/logo-full.png';
 import { getPosts, TOPICS, formatDate, isoDate } from '../lib/posts';
+import { person, website, graph, PERSON_ID, SITE_ID, SITE_URL } from '../lib/seo';
 
 const posts = await getPosts();
 const latest = posts.slice(0, 4);
 
-const personLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Person',
-  name: 'Nick Manganiello',
-  alternateName: 'vNick',
-  url: 'https://vnick.io/',
-  email: 'nick@vnick.io',
-  jobTitle: 'Principal Infrastructure Architect',
+const jsonLd = graph(person, website, {
+  '@type': 'WebPage',
+  '@id': `${SITE_URL}/#webpage`,
+  url: `${SITE_URL}/`,
+  name: 'vNick.io — Nick Manganiello',
   description:
-    'Infrastructure architect and systems builder: data centers, networks, virtualization, BCDR, cloud, live production and lighting.',
-  homeLocation: { '@type': 'Place', name: 'Long Island, New York' },
-  sameAs: ['https://stratora.io', 'https://djneventproductions.com/', 'https://github.com/DJzmoot'],
-  knowsAbout: [
-    'Network infrastructure',
-    'Virtualization',
-    'Business continuity and disaster recovery',
-    'Cloud infrastructure and endpoint management',
-    'Lighting design and live event production',
-  ],
-};
+    'Nick Manganiello is an infrastructure architect and systems builder: data centers, networks, virtualization, BCDR, cloud, live production and lighting.',
+  isPartOf: { '@id': SITE_ID },
+  about: { '@id': PERSON_ID },
+  inLanguage: 'en-US',
+});
 ---
 <Base
   title="vNick.io — Nick Manganiello — systems, from the rack to the rigging"
   description="Nick Manganiello is an infrastructure architect and systems builder: data centers, networks, virtualization, BCDR, cloud, live production and lighting. Written up from the field."
 >
-  <script type="application/ld+json" slot="head" set:html={JSON.stringify(personLd)} />
+  <script type="application/ld+json" slot="head" set:html={jsonLd} />
 
   <Fragment slot="backdrop">
     <canvas class="scene" id="scene" aria-hidden="true"></canvas>
