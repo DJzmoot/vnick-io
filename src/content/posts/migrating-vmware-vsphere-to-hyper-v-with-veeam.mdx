@@ -1,0 +1,573 @@
+---
+title: "The hypervisor is the easy part"
+description: "What it actually takes to move from VMware vSphere to Hyper-V with Veeam: what to rebuild instead of convert, how Instant Recovery works, designing the temporary state, and a feature matrix showing what Windows Server covers and what needs another product."
+date: 2026-11-05
+topic: virtualization
+draft: false
+---
+
+import DcReplacement from '../../components/diagrams/DcReplacement.astro';
+import InstantRecoveryPath from '../../components/diagrams/InstantRecoveryPath.astro';
+import LandingZone from '../../components/diagrams/LandingZone.astro';
+import MicrosoftStack from '../../components/diagrams/MicrosoftStack.astro';
+import RollbackBoundary from '../../components/diagrams/RollbackBoundary.astro';
+
+The current VMware conversation tends to start with a renewal quote.
+
+Someone opens the proposal, checks that the decimal point is in the right
+place, and suddenly an infrastructure platform that nobody planned to replace
+is now a project. Hyper-V comes back into the conversation, along with
+Proxmox, Nutanix and whatever else the team can reasonably operate. Then
+somebody asks the question that makes it real: how do we actually move the
+virtual machines?
+
+If Veeam already protects the VMware environment, the mechanical answer is
+better than it used to be. Veeam Backup & Replication can take a backup of a
+VMware VM and recover it directly onto Microsoft Hyper-V. You do not have to
+export a VMDK, find a converter, build an intermediate disk, copy it twice and
+hope the guest still remembers how to boot when you are done.
+
+That is the good news.
+
+The less exciting answer is that converting the disk was never going to be the
+hard part. The work is everything around it: building Hyper-V as an actual
+production platform, mapping the networks correctly, preserving recoverability
+during the transition, finding the VMware-specific assumptions hidden in the
+environment, and deciding which parts of the VMware operating model you are
+willing to replace.
+
+The migration is possible. It can even be fairly uneventful. But only if the
+project is about more than getting a VHDX to boot.
+
+## Not everything should be converted
+
+Veeam gives us a clean way to move a VM, which does not mean every VM should
+move that way.
+
+Some systems are better rebuilt on the destination. Infrastructure services
+are the obvious candidates because they usually already have a supported way
+to create another instance, synchronize state and retire the old one. A
+management server may be cleaner to install fresh than to carry years of old
+agents and platform-specific configuration into Hyper-V. An appliance may have
+a native Hyper-V image from the vendor. A load-balanced service may let us add
+new nodes on Hyper-V and drain the VMware nodes without converting anything.
+
+The decision is mostly about state. If the system's important state lives in a
+database, directory, cluster or application-level replication mechanism
+somewhere else, rebuilding the node is often safer than converting it. If the
+VM itself is the only complete copy of the application and its configuration,
+Veeam becomes much more attractive.
+
+Domain controllers are the hard rule for us: we do not P2V or V2V them.
+
+Active Directory already has a migration mechanism, and it is Active Directory
+replication. We build a new Windows VM on Hyper-V with a new name and its own
+identity, patch it, join it to the domain and promote it as an additional
+domain controller. If the outgoing DC is also providing DNS or acting as a
+Global Catalog, the replacement gets those roles as part of the plan. It goes
+into the correct AD site, and it stays beside the old DC long enough to prove
+that replication, SYSVOL, DNS registration and authentication are all behaving
+normally.
+
+Only after the new DC is healthy do we demote the old one. Then we let the
+removal replicate, clean up anything that did not leave cleanly, and verify
+the directory again. We do not reuse the old hostname. Reusing a
+domain-controller name creates ambiguity in exactly the system where ambiguity
+is least useful: old DNS records, replication metadata, monitoring history,
+scripts and people all have their own idea of what that name means.
+
+We may reuse the outgoing DC's IP address, but not until the old controller
+has been demoted, the address is no longer in use and Active Directory has
+converged on the change. The new DC starts with a temporary address. Once
+replication is healthy and the old server is gone, we move the established IP
+to the replacement, force the expected DNS registrations and validate
+replication, DNS and authentication again.
+
+The reason is practical. Infrastructure is full of switches, firewalls,
+hypervisors, UPS management cards, appliances and other things with DNS
+servers entered as static IP addresses. Reusing the address lets those systems
+keep reaching a local DNS server without turning the domain-controller
+replacement into a scavenger hunt through every management interface in the
+building. The name is new because the server is new; the address is reused
+because the service endpoint is already embedded everywhere.
+
+That sequence takes longer than converting the old DC, and it should. The
+objective is not to preserve the machine. It is to preserve the directory
+without making the machine special.
+
+<DcReplacement />
+
+## Start with what Veeam is actually doing
+
+The useful Veeam feature here is Instant Recovery to Microsoft Hyper-V. From a
+VMware backup, Veeam creates a VM on the target Hyper-V host and presents the
+workload disks directly from the backup repository. The VM can be running in
+minutes because Veeam is not waiting for every block to be copied onto
+production storage first.
+
+That does not mean the migration is finished in minutes.
+
+While the VM is running from the backup, the repository is part of the
+production I/O path and performance is limited. Veeam describes the recovered
+VM as a temporary spare, which is the right mental model. Once the workload is
+validated, the recovery has to be finalized by migrating the VM onto its
+production storage. As that copy runs, Veeam moves the data in the background
+until the VM is no longer dependent on the mounted backup.
+
+So the practical sequence is backup, shut down the VMware VM, take the final
+restore point, publish it on Hyper-V, validate it, migrate it to production
+storage and then protect it again as a Hyper-V VM. Instant Recovery shortens
+the outage. It does not eliminate the rest of the job.
+
+<InstantRecoveryPath />
+
+This is also why repository performance matters more than people expect. A
+repository designed to receive overnight backups may be perfectly good at that
+job and still be a bad place to run a group of production VMs. Before planning
+a large migration wave around Instant Recovery, test the repository under the
+read load the migration will create. The feature is fast because it moves the
+wait, not because it makes I/O disappear.
+
+## Build the destination before you need it
+
+A standalone Hyper-V host with a test VM proves that Windows can run a virtual
+machine. It does not prove that the replacement platform is ready.
+
+The target needs the same design attention the VMware environment received,
+even if VMware accumulated that attention over fifteen years and nobody
+remembers doing it. Host sizing, clustering, storage, Cluster Shared Volumes,
+Live Migration, virtual switches, VLANs, management access, patching,
+monitoring, backup traffic and failure domains all need an answer before the
+first production recovery starts.
+
+My preference is to give the new platform dedicated hosts and, if we are not
+building it hyper-converged, a dedicated SAN. That creates a clean destination
+with known capacity, known ownership and failure domains that do not change
+every time another workload moves. It also means the VMware environment can
+remain intact while Hyper-V is built, tested and loaded deliberately.
+
+The alternative is the shuffling game: evacuate enough VMs to free a host,
+repurpose that host for Hyper-V, move a first wave onto it, free another host,
+convert that one, and repeat until the old platform disappears. The same
+version exists on storage, where LUNs are emptied, reclaimed and handed to the
+new cluster a little at a time. It can work, and sometimes the budget leaves
+no other choice, but every step consumes rollback capacity and makes the
+temporary state harder to understand. A migration problem on the third wave is
+much easier to contain when the original VMware cluster and storage are still
+sitting there unchanged.
+
+The shuffling game is never fun, Hyper-V or otherwise. A separate landing zone
+costs more up front, but it buys a clean rollback boundary, lets both
+platforms run at their intended redundancy during the transition and keeps the
+migration order from being dictated by whichever host or datastore can be
+emptied next.
+
+<LandingZone />
+
+Networking is where a lot of otherwise clean migrations become exciting.
+
+VMware port groups do not follow the VM into Hyper-V. The source backup knows
+that a VM had network adapters, but the migration still needs an explicit
+mapping from the VMware networks to the correct Hyper-V virtual switches and
+VLANs. A server with one adapter on `Production` is easy. A vendor appliance
+with management, inside, outside and replication interfaces is where a
+friendly name stops being enough.
+
+I would build a network mapping sheet from the actual environment, not from
+the diagram in the documentation library. Port group, VLAN ID, subnet,
+gateway, purpose, target virtual switch and whether the NIC should connect
+during first boot. Then verify it against the switches and the VM itself. The
+spreadsheet from the last data-center move is useful evidence, but it is not
+the source of truth just because it has colors.
+
+Storage needs the same treatment. Capacity is the obvious number; performance
+and temporary headroom are the ones that get missed. The target has to absorb
+the normal workload, the migration copy, checkpoints, backup activity and
+whatever else the cluster is doing at the same time. A CSV with enough free
+terabytes can still be the wrong destination for a busy SQL Server.
+
+## The cutover should be boring
+
+For an ordinary server, the actual cutover can be reduced to a short sequence.
+
+Confirm the backup is good. Shut down the source VM cleanly. Run the final
+backup. Start Instant Recovery to Hyper-V from that restore point. Select the
+target host or cluster, map storage and networks, leave the NIC disconnected
+if the workload needs isolated validation, and boot it.
+
+The source VM stays off. That sounds obvious, but it belongs in the runbook.
+Two copies of the same domain member with the same hostname and IP address can
+make the migration memorable in ways that do not improve the project.
+
+Once the Hyper-V copy boots, I want to know more than whether Windows reached
+the login screen. Check every NIC, IP address, route and DNS registration.
+Check domain trust, time, application services, scheduled tasks, monitoring
+agents, security software and anything licensed against virtual hardware or a
+MAC address. Test the application from a real client. A green service in
+`services.msc` is not an application test.
+
+VMware Tools deserves a deliberate step rather than an instinctive uninstall.
+Current Windows and Linux guests generally have the Hyper-V integration
+components they need, but removing VMware Tools can change drivers and network
+behavior. Get the VM stable first, confirm that it is using the right devices,
+then remove what no longer belongs. The migration window is not improved by
+changing three things at once because two of them looked untidy.
+
+Firmware is another detail worth testing early. Hyper-V has Generation 1 and
+Generation 2 VMs, roughly separating legacy BIOS hardware from modern UEFI
+hardware, and the generation cannot be changed after the VM is created. During
+Instant Recovery, Veeam examines the backed-up workload and chooses a
+generation based on what it finds in the disk layout and boot configuration.
+That is helpful, but it also means an old VMware VM may arrive as Generation 1
+because its actual boot configuration is old, even if Generation 2 is what you
+would choose for a new server today.
+
+That is not necessarily a migration failure. It is a decision: preserve the
+workload as it exists, or rebuild it properly later. I would rather migrate an
+old server in the shape it understands than turn the cutover into an
+operating-system modernization project by accident.
+
+After the application owner signs off, migrate the recovered VM onto
+production storage and finalize the Veeam session. Then add the Hyper-V VM to
+the correct backup job, run a backup and verify that the new restore point is
+usable. Until there is a successful backup on the destination platform, the
+workload has moved but the operational responsibility has not caught up with
+it.
+
+## What changes when vCenter goes away
+
+The VM is usually the most portable part of a VMware environment. The
+operating model is not.
+
+VMware gives administrators one place to spend most of the day. Inventory,
+clusters, hosts, permissions, alarms, performance, templates, distributed
+switches, storage and migrations all meet in vCenter. Hyper-V has the
+underlying capabilities, but they are spread across Hyper-V Manager, Failover
+Cluster Manager, Windows Admin Center, PowerShell and, in larger environments,
+System Center Virtual Machine Manager or third-party tooling.
+
+That is not the same thing as saying Hyper-V cannot manage a cluster. It can.
+It means the team has to decide what its management plane is instead of
+assuming a direct replacement for vCenter will appear after the role is
+installed.
+
+The same is true of DRS. Hyper-V can live-migrate VMs, cluster workloads and
+respond to failures, but a VMware team accustomed to DRS continuously placing
+and balancing workloads will not find the same experience waiting under a
+different name. System Center can fill more of that role, and automation can
+fill other parts, but those are design choices with their own licensing and
+operational weight.
+
+Distributed switching is another place where the feature checklist hides the
+real change. Hyper-V virtual switches, switch-embedded teaming, VLAN
+configuration and network virtualization can build a resilient design. What
+does not come over is the existing vSphere Distributed Switch configuration,
+its operational history, or every third-party integration attached to it. The
+replacement may be technically straightforward and still require a new way of
+troubleshooting.
+
+Then there is everything built around VMware because VMware was assumed to be
+permanent: PowerCLI scripts, monitoring templates, CMDB discovery, backup
+reports, capacity tools, security scanners, deployment workflows and vendor
+appliances delivered as OVAs. Some will have Hyper-V equivalents. Some will
+need to be rewritten. Some will reveal that the only person who understood
+them left three years ago.
+
+The migration plan needs a line item for that work. Calling it "training" does
+not make it smaller.
+
+## What you are actually giving up
+
+This depends entirely on the VMware environment.
+
+If vSphere is hosting ordinary Windows and Linux VMs on a few clusters, with
+conventional networking and storage, Hyper-V may cover nearly everything the
+organization uses. Live Migration, Failover Clustering, replication, virtual
+switching, checkpoints, PowerShell automation and mature Veeam support are not
+science projects.
+
+If the environment depends on vSAN, NSX, extensive distributed-switch
+integrations, sophisticated DRS behavior, VMware-specific disaster recovery
+tooling or a catalog of vendor appliances only supported on ESXi, the answer
+changes. At that point the project is not replacing a hypervisor. It is
+replacing a stack.
+
+Vendor support is the one I would audit before doing anything clever. A Linux
+appliance may boot perfectly on Hyper-V and still be unsupported there. The
+fact that its kernel found the disk and network adapter does not change the
+support matrix. For an internal utility that may be an acceptable risk; for
+the appliance that runs the factory, it probably is not.
+
+There is also the accumulated familiarity of the team. People know where to
+look when an ESXi host has a bad day. They know which alarms matter, how long
+a Storage vMotion should take, what a stuck consolidation looks like and which
+log to ignore until it repeats. Hyper-V will develop its own set of instincts,
+but it does not ship with them.
+
+None of that means staying on VMware is the right answer. It means the renewal
+price and the migration price have to be compared honestly. Windows Server
+licensing, System Center, storage changes, professional services, training,
+rewritten automation and engineering time all count. Looking only at the
+hypervisor line item is how a licensing project becomes a surprise
+infrastructure program.
+
+Looking at you, Broadcom.
+
+## The feature matrix is not a yes-or-no answer
+
+This is the part that gets flattened in most platform comparisons. Hyper-V has
+equivalents for a large part of the vSphere feature set, but they do not all
+live in Hyper-V and they do not all arrive with Windows Server alone. Some are
+Failover Clustering features. Some require System Center Virtual Machine
+Manager. Some belong to Azure Local or Azure Site Recovery. A checkmark that
+needs four management products behind it is still a capability, but it is not
+the same operating model.
+
+<MicrosoftStack />
+
+The comparison below assumes an upper-tier vSphere or VMware Cloud Foundation
+environment on one side and Windows Server 2025 Datacenter on the other.
+**Direct** means the basic capability exists in Windows Server and Hyper-V,
+even if it depends on a Windows Server feature such as Failover Clustering.
+**Partial** means the result is similar but the behavior or management model
+is meaningfully different. **Additional product** means the closest answer
+requires something beyond Windows Server. **None** means there is no close
+equivalent.
+
+### Compute, availability and mobility
+
+<div class="table-scroll" role="region" aria-label="VMware to Hyper-V feature comparison: compute, availability and mobility" tabindex="0">
+
+| VMware feature | Hyper-V or Microsoft name | Match | What changes |
+| --- | --- | --- | --- |
+| ESXi | Windows Server Hyper-V role | Direct | Hyper-V is a Windows Server role rather than a dedicated appliance OS; Server Core is the minimal deployment. |
+| vCenter Server | Windows Admin Center, Failover Cluster Manager and Hyper-V Manager | Partial | There is no single native console equivalent to vCenter. System Center VMM is the closest centralized management plane. |
+| vSphere HA | Windows Server Failover Clustering | Direct | Failed VMs restart on surviving cluster nodes. |
+| vMotion | Hyper-V Live Migration | Direct | Moves a running VM between hosts without perceived downtime. |
+| Storage vMotion | Hyper-V Storage Migration | Direct | Moves a running VM's storage without taking it offline. |
+| Enhanced vMotion or shared-nothing migration | Shared-nothing Live Migration | Direct | Moves the VM and its storage without requiring shared storage. |
+| Cross-vCenter vMotion | Cross-cluster Live Migration through VMM | Additional product | VMM can migrate between clusters, but the workflow is not the same as cross-vCenter mobility. |
+| Distributed Resource Scheduler | Failover Clustering VM Load Balancing or VMM Dynamic Optimization | Partial | Clusters can rebalance VMs on memory pressure and CPU use, and VMM adds more control, but neither is feature-for-feature DRS parity. |
+| Distributed Power Management | VMM Power Optimization | Additional product | VMM can evacuate and power down hosts when cluster capacity permits. |
+| Storage DRS | VMM Storage Dynamic Optimization | Additional product | VMM can rebalance VHDs between CSVs or shares based on capacity thresholds. |
+| vSphere Fault Tolerance | No direct equivalent | None | Failover Clustering restarts a VM elsewhere; it does not keep a second VM executing in lockstep. Application-level clustering is the usual answer. |
+| Proactive HA | Cluster health monitoring plus external automation | Partial | There is no direct equivalent that consumes hardware-health warnings and evacuates a degrading host in the same way. |
+| HA Admission Control | Cluster capacity planning and VMM host reserves | Partial | Capacity can be reserved, but the policy model is different. |
+| VM/Host affinity rules | Cluster affinity, anti-affinity and Preferred Owners | Direct | Windows supports both soft and enforced anti-affinity behavior. |
+| Enhanced vMotion Compatibility | Processor Compatibility Mode | Direct | Windows Server 2025 adds Dynamic Processor Compatibility based on features common to the cluster; CPU vendors still cannot be mixed for Live Migration. |
+| Resource Pools | VMM host groups, clouds, capacity and quotas | Additional product | Native Hyper-V has per-VM controls; VMM adds delegated capacity and organizational boundaries. |
+
+</div>
+
+### Storage and networking
+
+<div class="table-scroll" role="region" aria-label="VMware to Hyper-V feature comparison: storage and networking" tabindex="0">
+
+| VMware feature | Hyper-V or Microsoft name | Match | What changes |
+| --- | --- | --- | --- |
+| VMFS datastores | Cluster Shared Volumes using NTFS or ReFS | Direct | CSVs give every Hyper-V cluster node access to shared VM storage. |
+| NFS datastores | Continuously available SMB 3 file shares | Partial | Hyper-V's primary file-based shared-storage design is SMB 3 rather than NFS. |
+| vSAN | Storage Spaces Direct or Azure Local | Direct | Local drives are pooled into software-defined storage in hyper-converged or disaggregated designs. |
+| vSAN stretched cluster | Stretched Failover Cluster with Storage Replica | Partial | It provides site-aware replication and failover, but quorum, networking and operational behavior differ. |
+| Storage Policy-Based Management | Storage classifications, Storage QoS and S2D resiliency settings | Partial | The component controls exist, but not as one consistent SPBM layer across every storage platform. |
+| Virtual Volumes | No direct VVol equivalent | None | Hyper-V has SAN integration, CSV, SMB, ODX and MPIO, but not the same per-VM VVol model. |
+| Changed Block Tracking | Resilient Change Tracking | Direct | RCT provides changed-block information to backup applications. |
+| vSphere Standard Switch | Hyper-V Virtual Switch | Direct | Native per-host virtual switching. |
+| vSphere Distributed Switch | Hyper-V Virtual Switch with SET, Network ATC or VMM Logical Networks | Partial | A resilient centralized design is possible, but there is no identical distributed-switch object in the native tools. |
+| NIC teaming | Switch Embedded Teaming | Direct | SET integrates teaming into the virtual switch and uses switch-independent operation rather than LACP. |
+| Network I/O Control | Hyper-V QoS, DCB, VMMQ and bandwidth weights | Partial | Similar controls exist, but policy and management differ. |
+| NSX network virtualization | Windows Server SDN and Network Controller | Partial | Microsoft provides overlays, gateways, ACLs and software load balancing, but not the full NSX feature set and ecosystem. |
+| NSX distributed firewall | SDN network security groups and ACLs | Partial | Microsegmentation requires the Microsoft SDN stack; it is not an ordinary base-switch feature. |
+| SR-IOV | Hyper-V SR-IOV | Direct | Compatible virtual functions can be exposed directly to guests. |
+| DirectPath I/O | Discrete Device Assignment | Direct | Passes a complete PCIe device into a VM, with restrictions on mobility, clustering and Dynamic Memory depending on the configuration. |
+
+</div>
+
+### Management, security and recovery
+
+<div class="table-scroll" role="region" aria-label="VMware to Hyper-V feature comparison: management, security and recovery" tabindex="0">
+
+| VMware feature | Hyper-V or Microsoft name | Match | What changes |
+| --- | --- | --- | --- |
+| vSphere Lifecycle Manager | Cluster-Aware Updating plus Windows Admin Center or Azure Update Manager | Partial | Cluster-Aware Updating drains, patches and reboots nodes in sequence; firmware integration depends on the hardware vendor. |
+| Host Profiles | VMM physical-computer profiles, Network ATC and PowerShell or DSC | Partial | These help build consistent hosts, but do not reproduce the same unified drift-compliance model. |
+| Content Library | VMM Library | Additional product | Stores VHDXs, ISOs, scripts, templates and deployment resources. |
+| VM Templates | VMM VM and Service Templates | Additional product | Without VMM, templates are usually implemented through PowerShell and prepared VHDXs. |
+| vCenter roles and permissions | Windows authorization plus VMM role-based access control | Additional product | Native Hyper-V delegation is coarse; VMM provides scoped roles and clouds. |
+| PowerCLI | Hyper-V and FailoverClusters PowerShell modules | Direct | The automation surface is strong, but existing PowerCLI code has to be rewritten. |
+| VM snapshots | Standard and Production Checkpoints | Direct | Production Checkpoints use guest backup mechanisms such as VSS instead of preserving active memory. |
+| Instant Clone | No close native equivalent | None | Differencing disks and VMM provisioning cover some use cases but not Instant Clone semantics. |
+| Secure Boot | Generation 2 VM Secure Boot | Direct | Supported for Windows and supported Linux guests. |
+| Virtual TPM | Hyper-V vTPM and Key Protectors | Direct | Available to Generation 2 VMs. |
+| VM Encryption | Shielded VMs and Host Guardian Service | Partial | Strong protection is available, including protection from fabric administrators, but deployment and key management differ from vSphere VM Encryption. |
+| NVIDIA vGPU | GPU Partitioning | Partial | Windows Server 2025 supports GPU-P and Live Migration on a defined set of GPUs, drivers and guest operating systems. Compatibility has to be checked carefully. |
+| Full GPU passthrough | Discrete Device Assignment | Direct | Dedicates a complete GPU to one VM and gives up more mobility than GPU-P. |
+| Nested virtualization | Hyper-V Nested Virtualization | Direct | Useful for labs, development, containers and supported nested scenarios. |
+| vSphere Replication | Hyper-V Replica | Direct | Provides asynchronous VM replication without requiring shared storage. |
+| Site Recovery Manager | Azure Site Recovery Recovery Plans | Additional product, partial | ASR provides sequencing, scripts, testing, failover and failback, but it is not a direct on-premises SRM replacement for every design. Hyper-V Replica alone does not provide the same orchestration. |
+| SRM with on-premises array replication | Hyper-V Replica, Storage Replica, Veeam Recovery Orchestrator or custom automation | Partial | There is no single native Microsoft product with the same storage-array orchestration model. |
+| vSphere with Tanzu | AKS on Azure Local | Additional product, partial | Kubernetes integration exists in the wider Microsoft stack, not as a native Windows Server Hyper-V feature. |
+
+</div>
+
+The pattern is fairly clear. Hyper-V covers the core virtualization work well:
+clustering, Live Migration, storage migration, replication, virtual switching,
+checkpoints, shared storage and hyper-converged infrastructure. The gaps show
+up higher in the stack. Fault Tolerance has no direct answer. Failover
+Clustering has basic VM load balancing, but fuller DRS-style optimization,
+Storage DRS, templates, delegated clouds and centralized fabric management
+pull in System Center VMM. NSX maps to a different SDN stack. SRM-style
+orchestration requires Azure Site Recovery, Veeam or another layer.
+
+That does not make Hyper-V incomplete. It means the comparison is VMware's
+integrated operating model against a Microsoft architecture assembled from
+several products. Whether that is a problem depends on which rows the
+environment actually uses today.
+
+## The maintenance window is not the restore time
+
+Instant Recovery makes it easy to underestimate the cutover window. The VM may
+boot quickly, but the maintenance window has to include the final shutdown,
+final backup, recovery preparation, first boot, guest cleanup, network
+changes, application validation and a real rollback decision. If the
+application has multiple tiers, all of them need a consistent order for
+shutdown and startup. If somebody has to drive to a site because an appliance
+came back on the wrong network, that belongs in the risk even if it does not
+fit neatly in the schedule.
+
+The window also changes when a service is the local copy of something the site
+depends on.
+
+Taking down an application server may affect one department. Taking down the
+only local domain controller and DNS server can make the whole building feel
+broken even when the WAN is up and remote controllers are reachable.
+Authentication may cross the WAN. DNS queries may wait on an unreachable
+address before trying the next one. Group Policy, RADIUS, file services,
+management tools and anything else using that DC as its nearest service can
+become slow or unavailable in ways that do not look obviously related to the
+migration.
+
+That is why domain controllers are built ahead of the cutover rather than
+placed inside it. The new Hyper-V DC can be promoted, replicated and tested
+while the VMware DC is still online. Clients can learn the replacement DNS
+service before the old address moves. By the time the outgoing DC is demoted,
+the site is not waiting for a replacement to exist; it is removing a redundant
+copy that has already been superseded.
+
+The same idea applies elsewhere. If the site has redundant DHCP, RADIUS,
+print, file or management services, move or build one side first and prove it
+before touching the other. If it does not have redundancy, say that plainly
+and size the maintenance window around the actual dependency. "The VM was only
+down for twenty minutes" is not useful if the local service took two hours to
+become trustworthy again.
+
+There is a secondary problem during site work: the tools used to perform and
+troubleshoot the migration may depend on the services being moved. Hyper-V
+management, Veeam, DNS, privileged access, monitoring and the jump host should
+remain reachable even while the local workload network is changing. I want an
+out-of-band path to the hosts and network, a known working remote
+authentication path, local credentials where appropriate, and the information
+needed to configure a switch without looking it up on the server that is
+currently powered off.
+
+Maintenance windows should be built around loss of service, not around time
+spent clicking through Veeam. For each wave, the runbook should say what
+becomes unavailable, who notices, what remains local, what falls back across
+the WAN, how long that fallback has actually been tested for, and the point at
+which we stop and roll back. The recovery wizard is one task inside that
+window. It is not the window.
+
+## Design the temporary state
+
+A migration of any size will run with both platforms in production for longer
+than expected. That temporary state is an architecture, not a scheduling
+inconvenience.
+
+Both environments need routing, monitoring, backup capacity, name resolution
+and access to shared services. Operations needs to know where a VM lives
+today, not where the project spreadsheet says it should live next Thursday.
+Backup jobs need to protect VMware workloads before the cut and Hyper-V
+workloads after it without leaving a gap or quietly protecting both copies
+forever.
+
+IP addressing can make coexistence simple if the same networks are available
+to both environments, but that convenience needs guardrails. The source must
+remain powered off once the destination is online. If the networks change,
+then DNS, firewalls, load balancers, monitoring and application configuration
+become part of every cutover. Neither design is automatically wrong; one just
+moves more dependencies at the same moment.
+
+Rollback also gets harder the longer the Hyper-V VM runs. Before first boot,
+rollback is usually "stop the recovery and power the VMware VM back on." Once
+users or applications have written new data to the Hyper-V copy, that is no
+longer a rollback. It is a data reconciliation problem. Every workload needs a
+defined point after which going back requires the application owner, not only
+the virtualization team.
+
+<RollbackBoundary />
+
+This is the same lesson that shows up in almost every infrastructure
+migration: you will live in the temporary state longer than you think. Design
+it like production, because it is.
+
+## Pilot with the awkward systems
+
+The first test VM should be easy. The pilot group should not be.
+
+Move a normal Windows application server to prove the process. Then include a
+Linux VM, a database, a multi-NIC appliance, something using UEFI and Secure
+Boot, something old enough to make Generation 1 relevant, and a workload with
+a real vendor support requirement. Test the cases that might change the
+runbook while the project can still afford to change it.
+
+For each pilot, record how long the final backup took, how quickly Instant
+Recovery booted, what repository performance looked like, how long the
+production-storage migration took, what changed inside the guest and what the
+application owner actually tested. Those numbers become the migration plan. A
+guess based on disk size does not.
+
+Then move in waves grouped by dependency, not alphabetically and not by
+whichever vCenter folder is easiest to select. An application server and its
+database may need to move together. New domain controllers should be
+introduced and old ones retired one at a time, outside the V2V waves entirely.
+A management tool may need to remain on VMware until the systems it manages
+have moved. The order should make the environment easier to operate after
+every wave, not only after the last one.
+
+The best cutovers will feel repetitive: same final backup, same network
+mapping, same isolated boot where required, same validation, same storage
+migration, same new backup and the same rollback decision. Repetition is not a
+lack of engineering. Repetition is what the engineering was for.
+
+## The long-term work starts after the last restore
+
+Once the VMs are on Hyper-V, the tempting thing is to declare the VMware exit
+complete and move on. The better use of the next few weeks is removing all the
+temporary decisions that made the migration safe.
+
+Standardize the host build. Document the virtual switches. Establish firmware,
+driver and Windows patch baselines. Decide how cluster validation is run and
+how often. Put capacity thresholds somewhere people will see them. Test Live
+Migration and host failure under load. Build backup and recovery reporting
+around Hyper-V instead of leaving the old VMware views in place as
+archaeological artifacts.
+
+Then look at the workloads that came across exactly as they were. An old
+Generation 1 server may be a candidate for a clean rebuild. A VM with four
+oversized disks may need to be right-sized. A vendor appliance that barely
+survived the move may need a replacement plan. Migration is allowed to
+preserve technical debt; it should not make the debt invisible again.
+
+Veeam makes the platform change practical because the backup becomes the
+conversion point. That is valuable beyond this one project. A backup that can
+recover a workload somewhere other than where it started is not only insurance
+against hardware failure; it is insurance against the platform becoming
+commercially or operationally wrong for you.
+
+But the feature does not decide whether Hyper-V is the right replacement, and
+it does not recreate the parts of vSphere that live outside the VM. That work
+remains architecture, operations and testing — which is where most of the work
+was going to be anyway.
+
+By the time you click Instant Recovery, most of the migration should already
+be over.

@@ -1,0 +1,48 @@
+---
+import Diagram from '../Diagram.astro';
+---
+<Diagram caption="The rollback decision belongs on the runbook before the window opens. Once production writes land on Hyper-V, going back is no longer only a virtualization decision.">
+  <svg viewBox="0 0 720 222" role="img" aria-labelledby="rbTitle rbDesc">
+    <title id="rbTitle">Where rollback becomes data reconciliation during a cutover</title>
+    <desc id="rbDesc">
+      Five cutover steps: final backup, Instant Recovery, validate, go live, then migrate and
+      protect. Through validation, rollback means stopping the recovery and powering the VMware
+      VM back on. From the first production write on Hyper-V, going back is a data reconciliation
+      problem that needs the application owner.
+    </desc>
+
+    <rect class="node" x="22" y="14" width="124" height="62" rx="8" />
+    <text class="label" x="84" y="41" text-anchor="middle">Final backup</text>
+    <text class="sub" x="84" y="59" text-anchor="middle">source stays off</text>
+    <rect class="node" x="158" y="14" width="124" height="62" rx="8" />
+    <text class="label" x="220" y="41" text-anchor="middle">Instant Recovery</text>
+    <text class="sub" x="220" y="59" text-anchor="middle">boot on Hyper-V</text>
+    <rect class="node" x="294" y="14" width="124" height="62" rx="8" />
+    <text class="label" x="356" y="41" text-anchor="middle">Validate</text>
+    <text class="sub" x="356" y="59" text-anchor="middle">real client tests</text>
+    <rect class="node-edge" x="438" y="14" width="124" height="62" rx="8" />
+    <text class="label" x="500" y="41" text-anchor="middle">Go live</text>
+    <text class="sub" x="500" y="59" text-anchor="middle">new data lands</text>
+    <rect class="node-edge" x="574" y="14" width="124" height="62" rx="8" />
+    <text class="label" x="636" y="41" text-anchor="middle">Migrate + protect</text>
+    <text class="sub" x="636" y="59" text-anchor="middle">storage, then backup</text>
+
+    <path class="link" d="M146 45 L158 45" />
+    <path class="link" d="M282 45 L294 45" />
+    <path class="link" d="M418 45 L438 45" />
+    <path class="link" d="M562 45 L574 45" />
+
+    <!-- The boundary -->
+    <path class="link-active" d="M428 8 L428 172" stroke-dasharray="6 5" />
+
+    <rect class="node" x="22" y="100" width="396" height="62" rx="8" />
+    <text class="label" x="220" y="127" text-anchor="middle">Rollback</text>
+    <text class="sub" x="220" y="145" text-anchor="middle">stop the recovery, power the VMware VM back on</text>
+
+    <rect class="node-edge" x="438" y="100" width="260" height="62" rx="8" />
+    <text class="label" x="568" y="127" text-anchor="middle">Data reconciliation</text>
+    <text class="sub" x="568" y="145" text-anchor="middle">going back needs the application owner</text>
+
+    <text class="tag" x="428" y="194" text-anchor="middle">first production write on Hyper-V</text>
+  </svg>
+</Diagram>

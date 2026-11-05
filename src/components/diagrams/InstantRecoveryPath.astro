@@ -1,0 +1,62 @@
+---
+import Diagram from '../Diagram.astro';
+---
+<Diagram caption="Instant Recovery changes where the VM runs before it changes where the data lives. Migrate to production copies the blocks in the background, and the repository leaves the I/O path when that copy finishes.">
+  <svg viewBox="0 0 720 340" role="img" aria-labelledby="irTitle irDesc">
+    <title id="irTitle">The VM's I/O path during and after Instant Recovery</title>
+    <desc id="irDesc">
+      While running from the backup, the Hyper-V VM does its I/O against the backup repository
+      and production storage is not yet in use, so the VM is up in minutes with limited
+      performance. After migration to production, the VM uses production storage and the
+      repository is out of the I/O path, ready for the VM to be protected as a Hyper-V VM.
+    </desc>
+
+    <!-- RUNNING FROM THE BACKUP -->
+    <rect class="panel" x="16" y="14" width="320" height="310" rx="12" />
+    <text class="panel-title" x="36" y="40">RUNNING FROM THE BACKUP</text>
+
+    <rect class="node" x="106" y="58" width="140" height="42" rx="8" />
+    <text class="label" x="176" y="85" text-anchor="middle">Hyper-V VM</text>
+
+    <path class="link-active" d="M140 100 L140 150 L106 150 L106 186" />
+    <text class="tag" x="36" y="136">VM I/O</text>
+    <path class="link-dim" d="M212 100 L212 150 L250 150 L250 186" />
+
+    <rect class="node-edge" x="36" y="186" width="140" height="58" rx="8" />
+    <text class="label" x="106" y="212" text-anchor="middle">Repository</text>
+    <text class="sub" x="106" y="230" text-anchor="middle">in the I/O path</text>
+
+    <rect class="node" x="182" y="186" width="140" height="58" rx="8" />
+    <text class="label" x="252" y="212" text-anchor="middle">Production</text>
+    <text class="sub" x="252" y="230" text-anchor="middle">not in use yet</text>
+
+    <text class="sub" x="36" y="280">Up in minutes, with limited performance.</text>
+    <text class="sub" x="36" y="298">A temporary spare, not a finished move.</text>
+
+    <!-- arrow between panels -->
+    <path class="link-active" d="M348 170 L376 170" />
+    <path class="link-active" d="M368 163 L376 170 L368 177" />
+
+    <!-- ON PRODUCTION STORAGE -->
+    <rect class="panel" x="388" y="14" width="316" height="310" rx="12" />
+    <text class="panel-title" x="408" y="40">ON PRODUCTION STORAGE</text>
+
+    <rect class="node" x="476" y="58" width="140" height="42" rx="8" />
+    <text class="label" x="546" y="85" text-anchor="middle">Hyper-V VM</text>
+
+    <path class="link-dim" d="M510 100 L510 150 L476 150 L476 186" />
+    <path class="link-active" d="M582 100 L582 150 L620 150 L620 186" />
+    <text class="tag" x="632" y="136">VM I/O</text>
+
+    <rect class="node" x="406" y="186" width="140" height="58" rx="8" />
+    <text class="label" x="476" y="212" text-anchor="middle">Repository</text>
+    <text class="sub" x="476" y="230" text-anchor="middle">out of the path</text>
+
+    <rect class="node-edge" x="552" y="186" width="140" height="58" rx="8" />
+    <text class="label" x="622" y="212" text-anchor="middle">Production</text>
+    <text class="sub" x="622" y="230" text-anchor="middle">in the I/O path</text>
+
+    <text class="sub" x="408" y="280">Full performance, no backup dependency.</text>
+    <text class="sub" x="408" y="298">Now protect it again as a Hyper-V VM.</text>
+  </svg>
+</Diagram>

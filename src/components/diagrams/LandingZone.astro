@@ -1,0 +1,74 @@
+---
+import Diagram from '../Diagram.astro';
+---
+<Diagram caption="Both routes end on Hyper-V. Only one of them keeps the original platform intact as the rollback target for the whole migration.">
+  <svg viewBox="0 0 720 300" role="img" aria-labelledby="lzTitle lzDesc">
+    <title id="lzTitle">A separate landing zone compared with the shuffling game</title>
+    <desc id="lzDesc">
+      With a separate landing zone, the VMware cluster and its storage stay unchanged while VMs
+      move in waves to a Hyper-V cluster on dedicated hosts and a dedicated SAN. In the shuffling
+      game, hosts and LUNs are emptied and converted one at a time, so every step consumes
+      rollback capacity and the order follows whatever can be emptied next.
+    </desc>
+
+    <!-- LANDING ZONE -->
+    <rect class="panel" x="16" y="14" width="320" height="270" rx="12" />
+    <text class="panel-title" x="36" y="40">SEPARATE LANDING ZONE</text>
+
+    <rect class="node" x="36" y="58" width="124" height="56" rx="8" />
+    <text class="label" x="98" y="83" text-anchor="middle">VMware</text>
+    <text class="sub" x="98" y="101" text-anchor="middle">hosts unchanged</text>
+    <rect class="node-edge" x="192" y="58" width="124" height="56" rx="8" />
+    <text class="label" x="254" y="83" text-anchor="middle">Hyper-V</text>
+    <text class="sub" x="254" y="101" text-anchor="middle">dedicated hosts</text>
+
+    <path class="link-active" d="M160 86 L192 86" />
+    <path class="link-active" d="M184 79 L192 86 L184 93" />
+
+    <path class="link" d="M98 114 L98 150" />
+    <path class="link" d="M254 114 L254 150" />
+
+    <rect class="node" x="36" y="150" width="124" height="56" rx="8" />
+    <text class="label" x="98" y="175" text-anchor="middle">Storage</text>
+    <text class="sub" x="98" y="193" text-anchor="middle">unchanged</text>
+    <rect class="node-edge" x="192" y="150" width="124" height="56" rx="8" />
+    <text class="label" x="254" y="175" text-anchor="middle">Dedicated SAN</text>
+    <text class="sub" x="254" y="193" text-anchor="middle">or hyper-converged</text>
+
+    <text class="sub" x="36" y="242">Both platforms keep their redundancy.</text>
+    <text class="sub" x="36" y="260">VMs move in waves, by dependency.</text>
+
+    <!-- SHUFFLING GAME -->
+    <rect class="panel" x="388" y="14" width="316" height="270" rx="12" />
+    <text class="panel-title" x="408" y="40">THE SHUFFLING GAME</text>
+
+    <rect class="node-edge" x="406" y="58" width="66" height="56" rx="8" />
+    <text class="label" x="439" y="83" text-anchor="middle">Host</text>
+    <text class="sub" x="439" y="101" text-anchor="middle">Hyper-V</text>
+    <rect class="node-edge" x="480" y="58" width="66" height="56" rx="8" />
+    <text class="label" x="513" y="83" text-anchor="middle">Host</text>
+    <text class="sub" x="513" y="101" text-anchor="middle">Hyper-V</text>
+    <rect class="panel" x="554" y="58" width="66" height="56" rx="8" />
+    <text class="label" x="587" y="83" text-anchor="middle">Host</text>
+    <text class="tag" x="587" y="101" text-anchor="middle">emptying</text>
+    <rect class="node" x="628" y="58" width="66" height="56" rx="8" />
+    <text class="label" x="661" y="83" text-anchor="middle">Host</text>
+    <text class="sub" x="661" y="101" text-anchor="middle">VMware</text>
+
+    <rect class="node-edge" x="406" y="150" width="66" height="56" rx="8" />
+    <text class="label" x="439" y="175" text-anchor="middle">LUN</text>
+    <text class="sub" x="439" y="193" text-anchor="middle">Hyper-V</text>
+    <rect class="panel" x="480" y="150" width="66" height="56" rx="8" />
+    <text class="label" x="513" y="175" text-anchor="middle">LUN</text>
+    <text class="tag" x="513" y="193" text-anchor="middle">emptying</text>
+    <rect class="node" x="554" y="150" width="66" height="56" rx="8" />
+    <text class="label" x="587" y="175" text-anchor="middle">LUN</text>
+    <text class="sub" x="587" y="193" text-anchor="middle">VMware</text>
+    <rect class="node" x="628" y="150" width="66" height="56" rx="8" />
+    <text class="label" x="661" y="175" text-anchor="middle">LUN</text>
+    <text class="sub" x="661" y="193" text-anchor="middle">VMware</text>
+
+    <text class="sub" x="408" y="242">Every step consumes rollback capacity.</text>
+    <text class="sub" x="408" y="260">The order follows what empties next.</text>
+  </svg>
+</Diagram>

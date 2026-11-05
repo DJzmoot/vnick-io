@@ -1,0 +1,56 @@
+---
+import Diagram from '../Diagram.astro';
+---
+<Diagram caption="The replacement is proven while the old DC is still online. The name is new because the server is new; the address moves only after the old controller is gone.">
+  <svg viewBox="0 0 720 206" role="img" aria-labelledby="dcTitle dcDesc">
+    <title id="dcTitle">Replacing a domain controller without converting it</title>
+    <desc id="dcDesc">
+      Four stages for the old and new domain controllers. In Build and Prove, the old DC stays
+      online on its established IP while the new DC is promoted on a temporary IP and proves
+      replication, SYSVOL, DNS and authentication. In Demote, the old DC is demoted and the new
+      DC carries the site. In Reuse IP, the old DC is gone, its name is not reused, and the new
+      DC takes the established IP and is validated again.
+    </desc>
+
+    <text class="panel-title" x="188" y="24" text-anchor="middle">BUILD</text>
+    <text class="panel-title" x="336" y="24" text-anchor="middle">PROVE</text>
+    <text class="panel-title" x="484" y="24" text-anchor="middle">DEMOTE</text>
+    <text class="panel-title" x="632" y="24" text-anchor="middle">REUSE IP</text>
+
+    <!-- Old DC lane -->
+    <text class="label" x="16" y="70">Old DC</text>
+    <text class="sub" x="16" y="88">VMware</text>
+    <rect class="node" x="118" y="40" width="140" height="62" rx="8" />
+    <text class="label" x="188" y="67" text-anchor="middle">Online</text>
+    <text class="sub" x="188" y="85" text-anchor="middle">established IP</text>
+    <rect class="node" x="266" y="40" width="140" height="62" rx="8" />
+    <text class="label" x="336" y="67" text-anchor="middle">Online</text>
+    <text class="sub" x="336" y="85" text-anchor="middle">established IP</text>
+    <rect class="node" x="414" y="40" width="140" height="62" rx="8" />
+    <text class="label" x="484" y="67" text-anchor="middle">Demoted</text>
+    <text class="sub" x="484" y="85" text-anchor="middle">removal replicates</text>
+    <rect class="panel" x="562" y="40" width="140" height="62" rx="8" />
+    <text class="label" x="632" y="67" text-anchor="middle">Gone</text>
+    <text class="sub" x="632" y="85" text-anchor="middle">name not reused</text>
+
+    <!-- The established IP moves once the old DC has gone -->
+    <path class="link-active" d="M484 102 L484 114 L632 114 L632 134" />
+    <path class="link-active" d="M625 126 L632 134 L639 126" />
+
+    <!-- New DC lane -->
+    <text class="label" x="16" y="164">New DC</text>
+    <text class="sub" x="16" y="182">Hyper-V</text>
+    <rect class="node" x="118" y="134" width="140" height="62" rx="8" />
+    <text class="label" x="188" y="161" text-anchor="middle">Promoted</text>
+    <text class="sub" x="188" y="179" text-anchor="middle">new name, temp IP</text>
+    <rect class="node" x="266" y="134" width="140" height="62" rx="8" />
+    <text class="label" x="336" y="161" text-anchor="middle">Replicating</text>
+    <text class="sub" x="336" y="179" text-anchor="middle">SYSVOL, DNS, auth</text>
+    <rect class="node" x="414" y="134" width="140" height="62" rx="8" />
+    <text class="label" x="484" y="161" text-anchor="middle">Carrying the site</text>
+    <text class="sub" x="484" y="179" text-anchor="middle">still on temp IP</text>
+    <rect class="node-edge" x="562" y="134" width="140" height="62" rx="8" />
+    <text class="label" x="632" y="161" text-anchor="middle">Established IP</text>
+    <text class="sub" x="632" y="179" text-anchor="middle">validate again</text>
+  </svg>
+</Diagram>

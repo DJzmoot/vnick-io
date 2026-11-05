@@ -1,0 +1,41 @@
+---
+import Diagram from '../Diagram.astro';
+---
+<Diagram caption="Where the answers in the matrix live. The higher a row lands in this stack, the more a checkmark depends on something beyond the Hyper-V role.">
+  <svg viewBox="0 0 720 280" role="img" aria-labelledby="stackTitle stackDesc">
+    <title id="stackTitle">Where Microsoft virtualization capabilities live</title>
+    <desc id="stackDesc">
+      Four layers. At the bottom, the Hyper-V role provides the virtual switch, Live Migration,
+      checkpoints and Hyper-V Replica. Above it, Windows Server features provide Failover
+      Clustering, Storage Spaces Direct, Storage Replica and SDN. Those two layers are included
+      with Windows Server 2025 Datacenter. Above them, System Center VMM provides Dynamic
+      Optimization, library and templates, and clouds and RBAC. At the top, Azure and third-party
+      products such as Azure Site Recovery, Azure Local and Veeam Recovery Orchestrator sit
+      beyond Windows Server.
+    </desc>
+
+    <rect class="node" x="16" y="14" width="520" height="56" rx="8" />
+    <text class="label" x="36" y="38">Azure and third party</text>
+    <text class="sub" x="36" y="57">Azure Site Recovery · Azure Local · Veeam Recovery Orchestrator</text>
+
+    <rect class="node" x="16" y="78" width="520" height="56" rx="8" />
+    <text class="label" x="36" y="102">System Center VMM</text>
+    <text class="sub" x="36" y="121">Dynamic Optimization · library and templates · clouds and RBAC</text>
+
+    <rect class="node-edge" x="16" y="142" width="520" height="56" rx="8" />
+    <text class="label" x="36" y="166">Windows Server features</text>
+    <text class="sub" x="36" y="185">Failover Clustering · Storage Spaces Direct · Storage Replica · SDN</text>
+
+    <rect class="node-edge" x="16" y="206" width="520" height="56" rx="8" />
+    <text class="label" x="36" y="230">Hyper-V role</text>
+    <text class="sub" x="36" y="249">Virtual switch · Live Migration · checkpoints · Hyper-V Replica</text>
+
+    <path class="link" d="M546 14 L556 14 L556 134 L546 134" />
+    <text class="tag-dim" x="568" y="70">Beyond</text>
+    <text class="tag-dim" x="568" y="88">Windows Server</text>
+
+    <path class="link-active" d="M546 142 L556 142 L556 262 L546 262" />
+    <text class="tag" x="568" y="198">Windows Server</text>
+    <text class="tag" x="568" y="216">2025 Datacenter</text>
+  </svg>
+</Diagram>
